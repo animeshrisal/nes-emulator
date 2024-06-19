@@ -2,13 +2,17 @@
 #include <stdint.h>
 #include <stdio.h>
 
+instruction_lookup[16*16] = {
+  {"BRK", 7},
+}  
+
 void create_cpu(CPU6502 *cpu, Bus *bus) {
   cpu->A = 0;
   cpu->X = 0;
   cpu->Y = 0;
   cpu->PC = 0;
   cpu->SP = 0xfd;
-  
+      
   cpu->cycles = 7;
   cpu->bus = bus;
 } 
@@ -17,12 +21,16 @@ int get_flag(CPU6502 *cpu, CPUStatusFlags flag) {
   return (cpu->SR >> flag) & 0x1;
 }
 
-void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bool, uint8_t n) {
+void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bool) {
   if(bool) {
-    cpu->SR |= 0x1 << n;
+    cpu->SR |= 0x1 << flag;
   } else {
-    cpu->SR &= ~(0x1 << n);
+    cpu->SR &= ~(0x1 << flag);
   }
+}
+
+void instruction_lookup() {
+  
 }
 
 void ADC(CPU6502 *cpu) {
@@ -57,7 +65,12 @@ void INX(CPU6502 *cpu) {}
 void INY(CPU6502 *cpu) {}
 void JMP(CPU6502 *cpu) {}
 void JSR(CPU6502 *cpu) {}
-void LDA(CPU6502 *cpu) {}
+
+void LDA(CPU6502 *cpu) {
+  cpu->A = 0xf;
+  set_flag(cpu, Z, cpu->A == 0x00);
+};
+
 void LDX(CPU6502 *cpu) {}
 void LDY(CPU6502 *cpu) {}
 void LSR(CPU6502 *cpu) {}
@@ -84,6 +97,25 @@ void TSX(CPU6502 *cpu) {}
 void TXA(CPU6502 *cpu) {}
 void TXS(CPU6502 *cpu) {}
 void TYA(CPU6502 *cpu) {}
+void XXX(CPU6502 *cpu) {}
+
+void clock(CPU6502 *cpu) {
+  if(cpu->cycles == 0) {
+    opcode = cpu->PC;
+  }
+};
+
+void reset(CPU6502 *cpu) {
+  cpu->PC = 0xffffffff;
+  cpu->A = 0;
+  cpu->X = 0;
+  cpu->Y = 0;
+  cpu->SP = 0xFD;
+
+};
+
+void irq() {};
+void nmi() {};
 
 void execute_opcode(CPU6502 *cpu, uint8_t opcode) {
       switch(opcode) {

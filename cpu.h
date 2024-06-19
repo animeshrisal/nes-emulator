@@ -1,5 +1,15 @@
 #include "./bus.h"
 #include <stdint.h>
+#include <sys/types.h>
+
+#define RESET_ADDRESS 0xFFFC
+
+typedef struct {
+  char name[4];
+  uint8_t (*opcode)(void);
+  uint8_t (*addrmode)(void);
+  uint8_t cycles; 
+} Instructions;
 
 typedef struct {
   uint8_t A;
@@ -10,7 +20,7 @@ typedef struct {
   uint16_t PC; //Program counter
   Bus *bus;
   unsigned long cycles;
-  
+  uint8_t fetched; 
 } CPU6502;
 
 typedef enum {
