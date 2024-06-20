@@ -17,7 +17,7 @@ typedef struct {
   uint8_t Y;
   uint8_t SR; //Status register
   uint8_t SP; //Stack Pointer
-  uint8_t PC; //Program counter
+  uint16_t PC; //Program counter
   Bus *bus;
   unsigned long cycles;
   uint8_t fetched; 
@@ -93,16 +93,3 @@ uint8_t TSX();
 uint8_t TXA();
 uint8_t TXS();
 uint8_t TYA();
-uint8_t XXX();
-
-uint8_t IMM(); // Immediate
-uint8_t ZP0(); // Zero Page
-uint8_t ZPX(); // Zero Page,X
-uint8_t ZPY(); // Zero Page,Y
-uint8_t REL(); // Relative
-uint8_t ABS(); // Absolute
-uint8_t ABX(); // Absolute,X
-uint8_t ABY(); // Absolute,Y
-uint8_t IND(); // Indirect
-uint8_t IZX(); // (Indirect,X)
-uint8_t IZY(); // (Indirect),Y
