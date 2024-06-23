@@ -1,9 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -pedantic
+CFLAGS = -Wall -Wextra -pedantic -Wno-return-type
 LIBS = `sdl2-config --cflags --libs`
 
 # List of source files
-SRCS = main.c cpu.c
+SRCS = $(wildcard *.c)
 # List of object files (each .c file will be compiled to a corresponding .o file)
 OBJS = $(SRCS:.c=.o)
 
