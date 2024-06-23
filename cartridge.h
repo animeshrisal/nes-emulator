@@ -3,6 +3,9 @@
 #define HEADER_SIZE 4
 #define UNUSED_SIZE 5
 
+#define PRG_ROM_SIZE 16384
+#define CHR_ROM_SIZE 8192
+
 typedef struct {
   uint8_t signature[HEADER_SIZE];
   uint8_t prg_rom;
@@ -15,4 +18,10 @@ typedef struct {
   uint8_t unused_space[UNUSED_SIZE];
 } CartridgeHeader;
 
-void read_from_cartridge();
+typedef struct {
+  CartridgeHeader cartridgeHeader;
+  uint8_t *prgSameSize;
+  uint8_t *chrRomSize;
+} Cartridge;
+
+void read_from_cartridge(Cartridge *cartridge);
