@@ -35,8 +35,8 @@ typedef enum {
 } CPUStatusFlags;
 
 void create_cpu(CPU6502 *cpu, Bus *bus);
-uint8_t IMP(CPU6502 *cpu);
 
+uint8_t IMP(CPU6502 *cpu);
 uint8_t ADC(CPU6502 *cpu);
 uint8_t AND(CPU6502 *cpu);
 uint8_t ASL(CPU6502 *cpu);

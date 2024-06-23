@@ -22,7 +22,6 @@ void read_from_cartridge(Cartridge *cartridge) {
   }
   printf("%d\n", nesHeader.chr_rom);
   printf("%d\n", nesHeader.prg_rom);
-  printf("Is a valid nes cartridge!");
 
   uint16_t prg_rom = nesHeader.prg_rom * PRG_ROM_SIZE;
   uint16_t chr_rom = nesHeader.chr_rom * CHR_ROM_SIZE;
@@ -37,7 +36,17 @@ void read_from_cartridge(Cartridge *cartridge) {
     perror("Error reading prg!");
   }
 
-  for (int i = 0; i < prg_rom; i++) {
+  if (fread(cartridge->chrRomSize, chr_rom, 1, file) != 1) {
+    perror("Error reading chr!");
+  }
+
+  for (int i = 0; i < 16; i++) {
     printf("0x%02X\n", cartridge->prgRomSize[i]);
   }
+
+  /*
+  for (int i = 0; i < chr_rom; i++) {
+    printf("0x%02X\n", cartridge->chrRomSize[i]);
+  }
+  */
 }

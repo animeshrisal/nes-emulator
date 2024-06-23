@@ -117,6 +117,14 @@ void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bool) {
 
 void instruction_lookup() {}
 
+void reset(CPU6502 *cpu) {
+  uint16_t abs_addr = 0xFFFC;
+  uint16_t low = read_address(abs_addr);
+  uint16_t high = read_address(abs_addr + 1);
+
+  cpu->PC = (high << 8) | low;
+};
+
 /*
  * Addressing Mode
  */
@@ -191,7 +199,7 @@ uint8_t XXX(CPU6502 *cpu) {}
 
 void clock(CPU6502 *cpu, Bus *bus, uint16_t addr) {
   if (cpu->cycles == 0) {
-    int opcode = 1;
+    int opcode = get_opcode(bus, cpu->PC);
     Instructions instruction = LOOKUP[opcode];
     cpu->cycles = instruction.cycles;
     uint8_t addrmode_additional_cycles = instruction.addrmode(cpu);
