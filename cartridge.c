@@ -28,16 +28,16 @@ void read_from_cartridge(Cartridge *cartridge) {
   uint16_t chr_rom = nesHeader.chr_rom * CHR_ROM_SIZE;
 
   cartridge->cartridgeHeader = nesHeader;
-  cartridge->prgSameSize =
+  cartridge->prgRomSize =
       (uint8_t *)malloc(nesHeader.prg_rom * sizeof(uint8_t));
   cartridge->chrRomSize =
       (uint8_t *)malloc(nesHeader.prg_rom * sizeof(uint8_t));
 
-  if (fread(cartridge->prgSameSize, prg_rom, 1, file) != 1) {
+  if (fread(cartridge->prgRomSize, prg_rom, 1, file) != 1) {
     perror("Error reading prg!");
   }
 
   for (int i = 0; i < prg_rom; i++) {
-    printf("0x%02X\n", cartridge->prgSameSize[i]);
+    printf("0x%02X\n", cartridge->prgRomSize[i]);
   }
 }

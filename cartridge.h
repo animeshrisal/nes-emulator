@@ -20,7 +20,7 @@ typedef struct {
 
 typedef struct {
   CartridgeHeader cartridgeHeader;
-  uint8_t *prgSameSize;
+  uint8_t *prgRomSize;
   uint8_t *chrRomSize;
 } Cartridge;
 
