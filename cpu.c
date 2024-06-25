@@ -107,8 +107,8 @@ int get_flag(CPU6502 *cpu, CPUStatusFlags flag) {
   return (cpu->SR >> flag) & 0x1;
 }
 
-void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bool) {
-  if (bool) {
+void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bools) {
+  if (bools) {
     cpu->SR |= 0x1 << flag;
   } else {
     cpu->SR &= ~(0x1 << flag);
@@ -117,13 +117,14 @@ void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bool) {
 
 void instruction_lookup() {}
 
+/*
 void reset(CPU6502 *cpu) {
   uint16_t abs_addr = 0xFFFC;
   uint16_t low = read_address(abs_addr);
   uint16_t high = read_address(abs_addr + 1);
 
   cpu->PC = (high << 8) | low;
-};
+};*/
 
 /*
  * Addressing Mode

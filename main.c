@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
   uint16_t startingPointer = 0x8000;
 
   create_cpu(&cpu, &bus);
-  read_from_cartridge(&cartridge);
+  read_from_cartridge(&bus, &cartridge);
 
   return 0;
 }

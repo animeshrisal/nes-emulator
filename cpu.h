@@ -1,3 +1,6 @@
+#ifndef CPU_H
+#define CPU_H
+
 #include "./bus.h"
 #include <stdint.h>
 #include <sys/types.h>
@@ -107,3 +110,5 @@ uint8_t ABY(CPU6502 *cpu); // Absolute,Y
 uint8_t IND(CPU6502 *cpu); // Indirect
 uint8_t IZX(CPU6502 *cpu); // (Indirect,X)
 uint8_t IZY(CPU6502 *cpu); // (Indirect),Y
+                           //
+#endif

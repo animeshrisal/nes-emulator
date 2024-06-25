@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void read_from_cartridge(Cartridge *cartridge) {
+void read_from_cartridge(Bus *bus, Cartridge *cartridge) {
   FILE *file = fopen("nestest.nes", "rb");
   if (!file) {
     perror("Error opening file");
@@ -20,12 +20,11 @@ void read_from_cartridge(Cartridge *cartridge) {
       nesHeader.signature[2] != 'S' || nesHeader.signature[3] != '\x1A') {
     perror("Not a valid nes cartridge");
   }
-  printf("%d\n", nesHeader.chr_rom);
-  printf("%d\n", nesHeader.prg_rom);
 
   uint16_t prg_rom = nesHeader.prg_rom * PRG_ROM_SIZE;
   uint16_t chr_rom = nesHeader.chr_rom * CHR_ROM_SIZE;
-
+  printf("0x%02x\n", nesHeader.mapper1);
+  printf("%d\n", nesHeader.mapper2);
   cartridge->cartridgeHeader = nesHeader;
   cartridge->prgRomSize =
       (uint8_t *)malloc(nesHeader.prg_rom * sizeof(uint8_t));

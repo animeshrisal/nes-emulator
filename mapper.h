@@ -1,3 +1,6 @@
+#ifndef MAPPER_H
+#define MAPPER_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -7,3 +10,5 @@ typedef struct {
 } Mapper;
 
 bool read_from_mapper(Mapper *mapper, uint16_t addr, uint32_t mapped_addr);
+
+#endif
