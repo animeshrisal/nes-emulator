@@ -10,7 +10,7 @@ void write_to_bus(Bus *bus, uint16_t addr, uint8_t data) {
 
 uint8_t read_from_bus(Bus *bus, uint16_t addr) {
   if (addr >= 0x8000 && addr <= 0xFFFF) {
-    read_from_mapper(bus->mapper, addr);
+    read_from_mapper(bus->mapper, 0xFFFF, 0xFFFF);
   };
 
   return bus->memory[addr];

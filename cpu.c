@@ -134,7 +134,12 @@ void reset(CPU6502 *cpu) {
  * Instructions
  */
 
-uint8_t ADC(CPU6502 *cpu) {}
+uint8_t ADC(CPU6502 *cpu) {
+  uint8_t value = 0xff;
+  set_flag(cpu, C, value > 255);
+  set_flag(cpu, Z, value & 0x00FF == 0);
+}
+
 uint8_t AND(CPU6502 *cpu) {}
 uint8_t ASL(CPU6502 *cpu) {}
 uint8_t BCC(CPU6502 *cpu) {}
@@ -170,8 +175,16 @@ uint8_t LDA(CPU6502 *cpu) {
   return 0;
 };
 
-uint8_t LDX(CPU6502 *cpu) {}
-uint8_t LDY(CPU6502 *cpu) {}
+uint8_t LDX(CPU6502 *cpu) {
+  cpu->X = cpu->A;
+  return 0;
+}
+
+uint8_t LDY(CPU6502 *cpu) {
+  cpu->Y = cpu->A;
+  return 0;
+}
+
 uint8_t LSR(CPU6502 *cpu) {}
 uint8_t NOP(CPU6502 *cpu) {}
 uint8_t ORA(CPU6502 *cpu) {}
@@ -195,8 +208,13 @@ uint8_t TAY(CPU6502 *cpu) {}
 uint8_t TSX(CPU6502 *cpu) {}
 uint8_t TXA(CPU6502 *cpu) {}
 uint8_t TXS(CPU6502 *cpu) {}
-uint8_t TYA(CPU6502 *cpu) {}
-uint8_t XXX(CPU6502 *cpu) {}
+
+uint8_t TYA(CPU6502 *cpu) {
+  cpu->A = cpu->Y;
+  return 0;
+}
+
+uint8_t XXX(CPU6502 *cpu) { return 0; }
 
 void clock(CPU6502 *cpu, Bus *bus, uint16_t addr) {
   if (cpu->cycles == 0) {
@@ -219,11 +237,30 @@ void reset(CPU6502 *cpu) {
   cpu->SP = 0xFD;
 };
 
-void irq() {};
+void irq(CPU6502 *cpu, CPUStatusFlags flag) {
+  if (get_flag(cpu, flag) == 0) {
+    // write(0x0100 + cpu->SP--, (cpu->PC >> 8) & 0x00FF);
+    cpu->SP--;
+
+    // write(0x0100 + cpu->SP--, cpu->PC & 0x00FF);
+    cpu->SP--;
+
+    set_flag(cpu, B, 0);
+    set_flag(cpu, U, 1);
+    set_flag(cpu, I, 1);
+    // write(0x0100 + cpu->SP, cpu->SR);
+  }
+};
+
 void nmi() {};
 
 uint8_t IMP(CPU6502 *cpu) {}
-uint8_t IMM(CPU6502 *cpu) {} // Immediate
+
+uint8_t IMM(CPU6502 *cpu) {
+  cpu->PC++;
+  return 0;
+} // Immediate
+//
 uint8_t ZP0(CPU6502 *cpu) {} // Zero Page
 uint8_t ZPX(CPU6502 *cpu) {} // Zero Page,X
 uint8_t ZPY(CPU6502 *cpu) {} // Zero Page,Y

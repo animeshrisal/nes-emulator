@@ -43,10 +43,4 @@ void read_from_cartridge(Bus *bus, Cartridge *cartridge) {
   }
 
   fclose(file);
-
-  /*
-  for (int i = 0; i < chr_rom; i++) {
-    printf("0x%02X\n", cartridge->chrRomSize[i]);
-  }
-  */
 }
