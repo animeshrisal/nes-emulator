@@ -1,4 +1,5 @@
 #include "./cpu.h"
+#include "bus.h"
 #include <stdint.h>
 
 static Instructions LOOKUP[16 * 16] = {
@@ -137,7 +138,7 @@ void reset(CPU6502 *cpu) {
 uint8_t ADC(CPU6502 *cpu) {
   uint8_t value = 0xff;
   set_flag(cpu, C, value > 255);
-  set_flag(cpu, Z, value & 0x00FF == 0);
+  set_flag(cpu, Z, (value & 0x00FF) == 0);
 }
 
 uint8_t AND(CPU6502 *cpu) {}
@@ -216,7 +217,7 @@ uint8_t TYA(CPU6502 *cpu) {
 
 uint8_t XXX(CPU6502 *cpu) { return 0; }
 
-void clock(CPU6502 *cpu, Bus *bus, uint16_t addr) {
+void clock(CPU6502 *cpu, Bus *bus) {
   if (cpu->cycles == 0) {
     int opcode = get_opcode(bus, cpu->PC);
     Instructions instruction = LOOKUP[opcode];
@@ -256,18 +257,123 @@ void nmi() {};
 
 uint8_t IMP(CPU6502 *cpu) {}
 
+// uses the next byte in the program counter as a value;
 uint8_t IMM(CPU6502 *cpu) {
   cpu->PC++;
   return 0;
 } // Immediate
 //
-uint8_t ZP0(CPU6502 *cpu) {} // Zero Page
-uint8_t ZPX(CPU6502 *cpu) {} // Zero Page,X
-uint8_t ZPY(CPU6502 *cpu) {} // Zero Page,Y
-uint8_t REL(CPU6502 *cpu) {} // Relative
-uint8_t ABS(CPU6502 *cpu) {} // Absolute
-uint8_t ABX(CPU6502 *cpu) {} // Absolute,X
-uint8_t ABY(CPU6502 *cpu) {} // Absolute,Y
-uint8_t IND(CPU6502 *cpu) {} // Indirect
-uint8_t IZX(CPU6502 *cpu) {} // (Indirect,X)
-uint8_t IZY(CPU6502 *cpu) {} // (Indirect),Y
+uint8_t ZP0(CPU6502 *cpu) {
+  uint16_t addr_abs = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+  addr_abs &= 0x00FF;
+  return 0;
+} // Zero Page
+//
+uint8_t ZPX(CPU6502 *cpu) {
+  uint16_t addr_abs = read_from_bus(cpu->bus, cpu->PC) + cpu->X;
+  cpu->PC++;
+  addr_abs = 0x00FF;
+  return 0;
+} // Zero Page,X
+
+uint8_t ZPY(CPU6502 *cpu) {
+  uint16_t addr_abs = read_from_bus(cpu->bus, cpu->PC) + cpu->Y;
+  cpu->PC++;
+  addr_abs = 0x00FF;
+  return 0;
+} // Zero Page,Y
+//
+uint8_t REL(CPU6502 *cpu) {
+  uint16_t addr_rel = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  if (addr_rel & 0x80) {
+    addr_rel |= 0xFF00;
+  }
+
+  return 0;
+} // Relative
+//
+//
+uint8_t ABS(CPU6502 *cpu) {
+  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t addr_abs = (hi << 8) | lo;
+
+  return 0;
+} // Absolute
+//
+uint8_t ABX(CPU6502 *cpu) {
+  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t addr_abs = (hi << 8) | lo;
+  addr_abs += cpu->X;
+
+  return 0;
+} // Absolute,X
+//
+uint8_t ABY(CPU6502 *cpu) {
+  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t addr_abs = (hi << 8) | lo;
+  addr_abs += cpu->Y;
+
+  return 0;
+} // Absolute,Y
+uint8_t IND(CPU6502 *cpu) {
+  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t addr_abs = (hi << 8) | lo;
+  return 0;
+} // Indirect
+//
+uint8_t IZX(CPU6502 *cpu) {
+  uint16_t addr = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t lo = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
+  uint16_t hi = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
+
+  uint16_t addr_abs = (hi << 8) | lo;
+
+  return 0;
+} // (Indirect,X)
+//
+//
+uint8_t IZY(CPU6502 *cpu) {
+  uint16_t addr = read_from_bus(cpu->bus, cpu->PC);
+  cpu->PC++;
+
+  uint16_t lo = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
+  uint16_t hi = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
+
+  uint16_t addr_abs = (hi << 8) | lo;
+
+  return 0;
+} // (Indirect,X)
+
+uint16_t read_ads_address(CPU6502 *cpu, uint16_t offset) {
+  uint16_t lo = (uint16_t)read_from_bus(cpu->bus, offset);
+  uint16_t hi = (uint16_t)read_from_bus(cpu->bus, offset + 1);
+
+  return (hi << 8) | lo;
+}
+
+void onUpdate(CPU6502 *cpu) { clock(cpu, cpu->bus); };
