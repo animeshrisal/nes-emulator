@@ -136,12 +136,34 @@ void reset(CPU6502 *cpu) {
  */
 
 uint8_t ADC(CPU6502 *cpu) {
-  uint8_t value = 0xff;
-  set_flag(cpu, C, value > 255);
-  set_flag(cpu, Z, (value & 0x00FF) == 0);
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = (uint16_t)cpu->A + (uint16_t)cpu->bus->current_value +
+                  (uint16_t)get_flag(cpu, C);
+
+  set_flag(cpu, C, temp > 255);
+  set_flag(cpu, V,
+           (~((uint16_t)cpu->A ^ (uint16_t)cpu->bus->current_value) &
+            ((uint16_t)cpu->A ^ (uint16_t)temp)) &
+               0x0080);
+
+  set_flag(cpu, N, temp & 0x80);
+
+  cpu->A = temp & 0x00FF;
+  return 0;
 }
 
-uint8_t AND(CPU6502 *cpu) {}
+uint8_t AND(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+
+  uint8_t value = cpu->bus->current_value;
+  cpu->A &= value;
+
+  set_flag(cpu, C, cpu->A > 255);
+  set_flag(cpu, Z, (cpu->A & 0x00FF) == 0);
+
+  return 0;
+}
+
 uint8_t ASL(CPU6502 *cpu) {}
 uint8_t BCC(CPU6502 *cpu) {}
 uint8_t BCS(CPU6502 *cpu) {}
@@ -153,10 +175,28 @@ uint8_t BPL(CPU6502 *cpu) {}
 uint8_t BRK(CPU6502 *cpu) {}
 uint8_t BVC(CPU6502 *cpu) {}
 uint8_t BVS(CPU6502 *cpu) {}
-uint8_t CLC(CPU6502 *cpu) {}
-uint8_t CLD(CPU6502 *cpu) {}
-uint8_t CLI(CPU6502 *cpu) {}
-uint8_t CLV(CPU6502 *cpu) {}
+
+// clear carry flag
+uint8_t CLC(CPU6502 *cpu) {
+  set_flag(cpu, C, false);
+  return 0;
+};
+
+uint8_t CLD(CPU6502 *cpu) {
+  set_flag(cpu, D, false);
+  return 0;
+}
+
+uint8_t CLI(CPU6502 *cpu) {
+  set_flag(cpu, I, false);
+  return 0;
+}
+
+uint8_t CLV(CPU6502 *cpu) {
+  set_flag(cpu, V, false);
+  return 0;
+}
+
 uint8_t CMP(CPU6502 *cpu) {}
 uint8_t CPX(CPU6502 *cpu) {}
 uint8_t CPY(CPU6502 *cpu) {}
@@ -255,7 +295,7 @@ void irq(CPU6502 *cpu, CPUStatusFlags flag) {
 
 void nmi() {};
 
-uint8_t IMP(CPU6502 *cpu) {}
+uint8_t IMP(CPU6502 *cpu) { return 0; }
 
 // uses the next byte in the program counter as a value;
 uint8_t IMM(CPU6502 *cpu) {
