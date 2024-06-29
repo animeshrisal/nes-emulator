@@ -205,9 +205,30 @@ uint8_t DEX(CPU6502 *cpu) {}
 uint8_t DEY(CPU6502 *cpu) {}
 uint8_t EOR(CPU6502 *cpu) {}
 uint8_t INC(CPU6502 *cpu) {}
-uint8_t INX(CPU6502 *cpu) {}
-uint8_t INY(CPU6502 *cpu) {}
-uint8_t JMP(CPU6502 *cpu) {}
+
+uint8_t INX(CPU6502 *cpu) {
+  cpu->X++;
+  set_flag(cpu, Z, cpu->X == 0x00);
+  set_flag(cpu, N, cpu->X & 0x80);
+
+  return 0;
+};
+
+uint8_t INY(CPU6502 *cpu) {
+  cpu->Y++;
+  set_flag(cpu, Z, cpu->Y == 0x00);
+  set_flag(cpu, N, cpu->Y & 0x80);
+
+  return 0;
+};
+
+uint8_t JMP(CPU6502 *cpu) {
+  uint8_t addr_abs;
+  cpu->PC = addr_abs;
+
+  return 0;
+}
+
 uint8_t JSR(CPU6502 *cpu) {}
 
 uint8_t LDA(CPU6502 *cpu) {
