@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
   SDL_RenderPresent(renderer);
 
   SDL_Delay(2000); // Wait for 2 seconds
-
+  //
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   SDL_Quit();
@@ -47,3 +47,5 @@ int main(int argc, char *argv[]) {
 void initSDL() {}
 
 void test() {}
+
+void onCreate() {}
