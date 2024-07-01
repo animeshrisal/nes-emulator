@@ -164,17 +164,99 @@ uint8_t AND(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t ASL(CPU6502 *cpu) {}
-uint8_t BCC(CPU6502 *cpu) {}
-uint8_t BCS(CPU6502 *cpu) {}
-uint8_t BEQ(CPU6502 *cpu) {}
-uint8_t BIT(CPU6502 *cpu) {}
-uint8_t BMI(CPU6502 *cpu) {}
-uint8_t BNE(CPU6502 *cpu) {}
-uint8_t BPL(CPU6502 *cpu) {}
-uint8_t BRK(CPU6502 *cpu) {}
-uint8_t BVC(CPU6502 *cpu) {}
-uint8_t BVS(CPU6502 *cpu) {}
+uint8_t ASL(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = cpu->bus->current_value << 1;
+  return 0;
+}
+
+uint8_t BCC(CPU6502 *cpu) {
+  if (get_flag(cpu, B) == 0) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+  return 0;
+}
+
+uint8_t BCS(CPU6502 *cpu) {
+
+  if (get_flag(cpu, C) == 1) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+
+  return 0;
+}
+
+uint8_t BEQ(CPU6502 *cpu) {
+
+  if (get_flag(cpu, Z) == 1) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+
+  return 0;
+}
+
+uint8_t BIT(CPU6502 *cpu) { return 0; }
+
+uint8_t BMI(CPU6502 *cpu) {
+
+  if (get_flag(cpu, N) == 1) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+
+  return 0;
+}
+
+uint8_t BNE(CPU6502 *cpu) {
+  if (get_flag(cpu, Z) == 0) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+
+  return 0;
+}
+uint8_t BPL(CPU6502 *cpu) {
+  if (get_flag(cpu, N) == 0) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+  return 0;
+}
+uint8_t BRK(CPU6502 *cpu) { return 0; }
+uint8_t BVC(CPU6502 *cpu) {
+  if (get_flag(cpu, V) == 0) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+  return 0;
+}
+
+uint8_t BVS(CPU6502 *cpu) {
+  if (get_flag(cpu, V) == 0) {
+    uint16_t addr_abs = 0xff00;
+    cpu->cycles++;
+
+    cpu->PC = addr_abs;
+  }
+  return 0;
+}
 
 // clear carry flag
 uint8_t CLC(CPU6502 *cpu) {
@@ -197,14 +279,70 @@ uint8_t CLV(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t CMP(CPU6502 *cpu) {}
-uint8_t CPX(CPU6502 *cpu) {}
-uint8_t CPY(CPU6502 *cpu) {}
-uint8_t DEC(CPU6502 *cpu) {}
-uint8_t DEX(CPU6502 *cpu) {}
-uint8_t DEY(CPU6502 *cpu) {}
-uint8_t EOR(CPU6502 *cpu) {}
-uint8_t INC(CPU6502 *cpu) {}
+uint8_t CMP(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = (uint16_t)cpu->A - (uint16_t)cpu->bus->current_value;
+  set_flag(cpu, C, cpu->A >= cpu->bus->current_value);
+  set_flag(cpu, Z, (temp & 0x00ff) == 0x00000);
+  set_flag(cpu, N, temp & 0x0080);
+  return 0;
+}
+
+uint8_t CPX(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = (uint16_t)cpu->X - (uint16_t)cpu->bus->current_value;
+  set_flag(cpu, C, cpu->X >= cpu->bus->current_value);
+  set_flag(cpu, Z, (temp & 0x00ff) == 0x0000);
+  set_flag(cpu, N, temp & 0x0080);
+  return 0;
+}
+
+uint8_t CPY(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = (uint16_t)cpu->Y - (uint16_t)cpu->bus->current_value;
+  set_flag(cpu, C, cpu->Y >= cpu->bus->current_value);
+  set_flag(cpu, Z, (temp & 0x00ff) == 0x0000);
+  set_flag(cpu, N, temp & 0x0080);
+  return 0;
+}
+
+uint8_t DEC(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  cpu->bus->current_value--;
+  set_flag(cpu, Z, cpu->bus->current_value == 0);
+  set_flag(cpu, N, cpu->bus->current_value & 0x80);
+  return 0;
+}
+
+uint8_t DEX(CPU6502 *cpu) {
+  cpu->X--;
+  set_flag(cpu, Z, cpu->X == 0);
+  set_flag(cpu, N, cpu->X & 0x80);
+  return 0;
+}
+
+uint8_t DEY(CPU6502 *cpu) {
+  cpu->Y--;
+  set_flag(cpu, Z, cpu->Y == 0);
+  set_flag(cpu, N, cpu->Y & 0x80);
+  return 0;
+}
+
+uint8_t EOR(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  cpu->A ^= cpu->bus->current_value;
+  set_flag(cpu, Z, cpu->A == 0);
+  set_flag(cpu, N, cpu->A & 0x80);
+  return 0;
+}
+
+uint8_t INC(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = cpu->bus->current_value + 1;
+  set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
+  set_flag(cpu, N, temp & 0x0080);
+  return 0;
+}
 
 uint8_t INX(CPU6502 *cpu) {
   cpu->X++;
@@ -229,7 +367,7 @@ uint8_t JMP(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t JSR(CPU6502 *cpu) {}
+uint8_t JSR(CPU6502 *cpu) { return 0; }
 
 uint8_t LDA(CPU6502 *cpu) {
   cpu->A = 0xf;
@@ -247,29 +385,45 @@ uint8_t LDY(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t LSR(CPU6502 *cpu) {}
-uint8_t NOP(CPU6502 *cpu) {}
-uint8_t ORA(CPU6502 *cpu) {}
-uint8_t PHA(CPU6502 *cpu) {}
-uint8_t PHP(CPU6502 *cpu) {}
-uint8_t PLA(CPU6502 *cpu) {}
-uint8_t PLP(CPU6502 *cpu) {}
-uint8_t ROL(CPU6502 *cpu) {}
-uint8_t ROR(CPU6502 *cpu) {}
-uint8_t RTI(CPU6502 *cpu) {}
-uint8_t RTS(CPU6502 *cpu) {}
-uint8_t SBC(CPU6502 *cpu) {}
-uint8_t SEC(CPU6502 *cpu) {}
-uint8_t SED(CPU6502 *cpu) {}
-uint8_t SEI(CPU6502 *cpu) {}
-uint8_t STA(CPU6502 *cpu) {}
-uint8_t STX(CPU6502 *cpu) {}
-uint8_t STY(CPU6502 *cpu) {}
-uint8_t TAX(CPU6502 *cpu) {}
-uint8_t TAY(CPU6502 *cpu) {}
-uint8_t TSX(CPU6502 *cpu) {}
-uint8_t TXA(CPU6502 *cpu) {}
-uint8_t TXS(CPU6502 *cpu) {}
+uint8_t LSR(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  set_flag(cpu, C, cpu->bus->current_value & 0x01);
+  cpu->bus->current_value >>= 1;
+  set_flag(cpu, Z, cpu->bus->current_value == 0);
+  set_flag(cpu, N, cpu->bus->current_value & 0x80);
+  return 0;
+}
+
+uint8_t NOP(CPU6502 *cpu) { return 0; }
+
+uint8_t ORA(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  cpu->A |= cpu->bus->current_value;
+  set_flag(cpu, Z, cpu->A == 0);
+  set_flag(cpu, N, cpu->A & 0x80);
+  return 0;
+}
+
+uint8_t PHA(CPU6502 *cpu) { return 0; }
+uint8_t PHP(CPU6502 *cpu) { return 0; }
+uint8_t PLA(CPU6502 *cpu) { return 0; }
+uint8_t PLP(CPU6502 *cpu) { return 0; }
+uint8_t ROL(CPU6502 *cpu) { return 0; }
+uint8_t ROR(CPU6502 *cpu) { return 0; }
+uint8_t RTI(CPU6502 *cpu) { return 0; }
+uint8_t RTS(CPU6502 *cpu) { return 0; }
+uint8_t SBC(CPU6502 *cpu) { return 0; }
+uint8_t SEC(CPU6502 *cpu) { return 0; }
+uint8_t SED(CPU6502 *cpu) { return 0; }
+uint8_t SEI(CPU6502 *cpu) { return 0; }
+uint8_t STA(CPU6502 *cpu) { return 0; }
+uint8_t STX(CPU6502 *cpu) { return 0; }
+uint8_t STY(CPU6502 *cpu) { return 0; }
+uint8_t TAX(CPU6502 *cpu) { return 0; }
+uint8_t TAY(CPU6502 *cpu) { return 0; }
+uint8_t TSX(CPU6502 *cpu) { return 0; }
+uint8_t TXA(CPU6502 *cpu) { return 0; }
+uint8_t TXS(CPU6502 *cpu) { return 0; }
 
 uint8_t TYA(CPU6502 *cpu) {
   cpu->A = cpu->Y;
@@ -314,7 +468,19 @@ void irq(CPU6502 *cpu, CPUStatusFlags flag) {
   }
 };
 
-void nmi() {};
+// non-maskable interrupt
+void nmi(CPU6502 *cpu) {
+  set_flag(cpu, B, 0);
+  set_flag(cpu, U, 1);
+  set_flag(cpu, I, 1);
+
+  uint16_t addr_abs = 0xFFFA;
+  uint16_t lo = 0xFFAA;
+  uint16_t hi = 0xFFAA;
+
+  cpu->PC = (hi << 8) | lo;
+  cpu->cycles = 8;
+};
 
 uint8_t IMP(CPU6502 *cpu) { return 0; }
 
