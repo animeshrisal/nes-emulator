@@ -10,13 +10,11 @@ void write_to_memory(Bus *bus, uint16_t addr, uint8_t data) {
 }
 
 uint8_t read_from_memory(Bus *bus, uint16_t addr) {
-  printf("%d\n", addr);
   if (addr >= 0x0000 && addr <= 0x0800) {
     return bus->memory[addr % 0x0800];
   };
 
   if (addr >= 0x8000) {
-    printf("reading from cartridge:");
     return read_from_cartridge(bus, addr);
   }
 
@@ -49,6 +47,7 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
   uint16_t chr_rom = nesHeader.chr_rom * CHR_ROM_SIZE;
 
   cartridge->cartridgeHeader = nesHeader;
+
   cartridge->prgRomSize = malloc(prg_rom);
 
   cartridge->chrRomSize = malloc(chr_rom);
@@ -61,7 +60,11 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
     perror("Error reading chr!");
   }
 
+  printf("%x\n", cartridge->cartridgeHeader.prg_rom);
+
   fclose(file);
+
+  bus->cartridge = cartridge;
 }
 
 uint16_t read_from_cartridge(Bus *bus, uint16_t addr) {
@@ -69,5 +72,8 @@ uint16_t read_from_cartridge(Bus *bus, uint16_t addr) {
 }
 
 uint16_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr) {
-  return addr & (cartridge->cartridgeHeader.prg_rom > 1 ? 0x7FFF : 0x3FFF);
+  uint16_t mapped_addr =
+      addr & (cartridge->cartridgeHeader.prg_rom > 1 ? 0x7FFF : 0x3FFF);
+
+  return cartridge->prgRomSize[mapped_addr];
 }
