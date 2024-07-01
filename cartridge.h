@@ -1,7 +1,6 @@
 #ifndef CARTRIDGE_H
 #define CARTRIDGE_H
 
-#include "./bus.h"
 #include <stdint.h>
 
 #define HEADER_SIZE 4
@@ -27,7 +26,5 @@ typedef struct {
   uint8_t *prgRomSize;
   uint8_t *chrRomSize;
 } Cartridge;
-
-void read_from_cartridge(Bus *bus, Cartridge *cartridge);
 
 #endif

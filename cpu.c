@@ -1,6 +1,7 @@
 #include "./cpu.h"
 #include "bus.h"
 #include <stdint.h>
+#include <stdio.h>
 
 static Instructions LOOKUP[16 * 16] = {
     {"BRK", BRK, IMP, 7}, {"ORA", ORA, IZX, 6}, {"???", XXX, IMP, 2},
@@ -95,11 +96,23 @@ void create_cpu(CPU6502 *cpu, Bus *bus) {
   cpu->A = 0;
   cpu->X = 0;
   cpu->Y = 0;
-  cpu->PC = 0;
+  cpu->PC = 0x0000;
   cpu->SP = 0xfd;
 
   cpu->cycles = 7;
   cpu->bus = bus;
+}
+
+void reset_cpu(CPU6502 *cpu) {
+
+  printf("READ\n");
+  uint16_t addr_abs = 0xFFFC;
+  uint16_t lo = read_from_memory(cpu->bus, addr_abs + 0);
+  uint16_t hi = read_from_memory(cpu->bus, addr_abs + 1);
+  printf("%d", lo);
+  printf("%d", hi);
+
+  cpu->PC = (hi << 8) | lo;
 }
 
 uint8_t get_opcode(Bus *bus, uint16_t addr) { return 1; }
@@ -541,11 +554,20 @@ uint8_t XXX(CPU6502 *cpu) { return 0; }
 
 void clock(CPU6502 *cpu, Bus *bus) {
   if (cpu->cycles == 0) {
+
+    printf("%d\n", cpu->PC);
     int opcode = get_opcode(bus, cpu->PC);
+    printf("%d\n", opcode);
+    set_flag(cpu, U, 1);
+    cpu->PC++;
+
     Instructions instruction = LOOKUP[opcode];
+    printf("%s\n", instruction.name);
     cpu->cycles = instruction.cycles;
+
     uint8_t addrmode_additional_cycles = instruction.addrmode(cpu);
     uint8_t opmode_additional_cycles = instruction.opcode(cpu);
+
     cpu->cycles += addrmode_additional_cycles & opmode_additional_cycles;
   }
 

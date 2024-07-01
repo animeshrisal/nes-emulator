@@ -11,9 +11,9 @@ typedef struct {
   uint8_t A;
   uint8_t X;
   uint8_t Y;
-  uint8_t SR; // Status regisjter
-  uint8_t SP; // Stack Pointer
-  uint8_t PC; // Program counter
+  uint8_t SR;  // Status regisjter
+  uint8_t SP;  // Stack Pointer
+  uint16_t PC; // Program counter
   Bus *bus;
   unsigned long cycles;
   uint8_t fetched;
@@ -38,6 +38,7 @@ typedef enum {
 } CPUStatusFlags;
 
 void create_cpu(CPU6502 *cpu, Bus *bus);
+void reset_cpu(CPU6502 *cpu);
 
 uint8_t IMP(CPU6502 *cpu);
 uint8_t ADC(CPU6502 *cpu);
@@ -111,4 +112,6 @@ uint8_t IND(CPU6502 *cpu); // Indirect
 uint8_t IZX(CPU6502 *cpu); // (Indirect,X)
 uint8_t IZY(CPU6502 *cpu); // (Indirect),Y
                            //
+                           //
+void onUpdate(CPU6502 *cpu);
 #endif

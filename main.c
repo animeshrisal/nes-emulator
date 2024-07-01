@@ -1,4 +1,3 @@
-#include "./cartridge.h"
 #include "./cpu.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_video.h>
@@ -11,8 +10,10 @@ int main(int argc, char *argv[]) {
   uint16_t startingPointer = 0x8000;
 
   create_cpu(&cpu, &bus);
-  read_from_cartridge(&bus, &cartridge);
+  load_cartridge(&bus, &cartridge);
+  reset_cpu(&cpu);
 
+  /*
   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
     printf("SDL_Init Error %s\n", SDL_GetError());
   };
@@ -37,9 +38,14 @@ int main(int argc, char *argv[]) {
 
   SDL_Delay(2000); // Wait for 2 seconds
   //
-  SDL_DestroyRenderer(renderer);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
+  */
+  while (1) {
+    onUpdate(&cpu);
+  };
+
+  // SDL_DestroyRenderer(renderer);
+  // SDL_DestroyWindow(window);
+  // SDL_Quit();
 
   return 0;
 }
