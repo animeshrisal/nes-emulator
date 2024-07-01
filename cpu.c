@@ -342,7 +342,7 @@ uint8_t INY(CPU6502 *cpu) {
 };
 
 uint8_t JMP(CPU6502 *cpu) {
-  uint8_t addr_abs;
+  uint8_t addr_abs = 0xFF;
   cpu->PC = addr_abs;
 
   return 0;
