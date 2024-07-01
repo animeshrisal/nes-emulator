@@ -116,25 +116,6 @@ void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bools) {
   }
 }
 
-void instruction_lookup() {}
-
-/*
-void reset(CPU6502 *cpu) {
-  uint16_t abs_addr = 0xFFFC;
-  uint16_t low = read_address(abs_addr);
-  uint16_t high = read_address(abs_addr + 1);
-
-  cpu->PC = (high << 8) | low;
-};*/
-
-/*
- * Addressing Mode
- */
-
-/*
- * Instructions
- */
-
 uint8_t ADC(CPU6502 *cpu) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = (uint16_t)cpu->A + (uint16_t)cpu->bus->current_value +
@@ -405,21 +386,21 @@ uint8_t ORA(CPU6502 *cpu) {
 }
 
 uint8_t PHA(CPU6502 *cpu) {
-  write_to_bus(cpu->bus, 0x0100 + cpu->SP, cpu->A);
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, cpu->A);
 
   return 0;
 }
 
 uint8_t PHP(CPU6502 *cpu) {
-  write_to_bus(cpu->bus, 0x0100 + cpu->SP,
-               cpu->SR | 0x30); // Push status register with B flag set
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP,
+                  cpu->SR | 0x30); // Push status register with B flag set
   cpu->SP--;
   return 0;
 }
 
 uint8_t PLA(CPU6502 *cpu) {
   cpu->SP++;
-  cpu->A = read_from_bus(cpu->bus, 0x0100 + cpu->SP);
+  cpu->A = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
   set_flag(cpu, Z, cpu->A == 0);
   set_flag(cpu, N, cpu->A & 0x80);
   return 0;
@@ -427,7 +408,7 @@ uint8_t PLA(CPU6502 *cpu) {
 
 uint8_t PLP(CPU6502 *cpu) {
   cpu->SP++;
-  cpu->SR = read_from_bus(cpu->bus, 0x0100 + cpu->SP) & 0xEF |
+  cpu->SR = read_from_memory(cpu->bus, 0x0100 + cpu->SP) & 0xEF |
             0x20; // Restore status register with B flag clear
   return 0;
 }
@@ -454,19 +435,19 @@ uint8_t ROR(CPU6502 *cpu) {
 
 uint8_t RTI(CPU6502 *cpu) {
   cpu->SP++;
-  cpu->SR = read_from_bus(cpu->bus, 0x0100 + cpu->SP) & 0xEF | 0x20;
+  cpu->SR = read_from_memory(cpu->bus, 0x0100 + cpu->SP) & 0xEF | 0x20;
   cpu->SP++;
-  cpu->PC = read_from_bus(cpu->bus, 0x0100 + cpu->SP);
+  cpu->PC = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
   cpu->SP++;
-  cpu->PC |= (read_from_bus(cpu->bus, 0x0100 + cpu->SP) << 8);
+  cpu->PC |= (read_from_memory(cpu->bus, 0x0100 + cpu->SP) << 8);
   return 0;
 }
 
 uint8_t RTS(CPU6502 *cpu) {
   cpu->SP++;
-  cpu->PC = read_from_bus(cpu->bus, 0x0100 + cpu->SP);
+  cpu->PC = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
   cpu->SP++;
-  cpu->PC |= (read_from_bus(cpu->bus, 0x0100 + cpu->SP) << 8);
+  cpu->PC |= (read_from_memory(cpu->bus, 0x0100 + cpu->SP) << 8);
   cpu->PC++;
   return 0;
 }
@@ -617,28 +598,28 @@ uint8_t IMM(CPU6502 *cpu) {
 } // Immediate
 //
 uint8_t ZP0(CPU6502 *cpu) {
-  uint16_t addr_abs = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
   addr_abs &= 0x00FF;
   return 0;
 } // Zero Page
 //
 uint8_t ZPX(CPU6502 *cpu) {
-  uint16_t addr_abs = read_from_bus(cpu->bus, cpu->PC) + cpu->X;
+  uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC) + cpu->X;
   cpu->PC++;
   addr_abs = 0x00FF;
   return 0;
 } // Zero Page,X
 
 uint8_t ZPY(CPU6502 *cpu) {
-  uint16_t addr_abs = read_from_bus(cpu->bus, cpu->PC) + cpu->Y;
+  uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC) + cpu->Y;
   cpu->PC++;
   addr_abs = 0x00FF;
   return 0;
 } // Zero Page,Y
 //
 uint8_t REL(CPU6502 *cpu) {
-  uint16_t addr_rel = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t addr_rel = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
   if (addr_rel & 0x80) {
@@ -650,10 +631,10 @@ uint8_t REL(CPU6502 *cpu) {
 //
 //
 uint8_t ABS(CPU6502 *cpu) {
-  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t hi = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
   uint16_t addr_abs = (hi << 8) | lo;
@@ -662,10 +643,10 @@ uint8_t ABS(CPU6502 *cpu) {
 } // Absolute
 //
 uint8_t ABX(CPU6502 *cpu) {
-  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t hi = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
   uint16_t addr_abs = (hi << 8) | lo;
@@ -675,10 +656,10 @@ uint8_t ABX(CPU6502 *cpu) {
 } // Absolute,X
 //
 uint8_t ABY(CPU6502 *cpu) {
-  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t hi = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
   uint16_t addr_abs = (hi << 8) | lo;
@@ -687,10 +668,10 @@ uint8_t ABY(CPU6502 *cpu) {
   return 0;
 } // Absolute,Y
 uint8_t IND(CPU6502 *cpu) {
-  uint16_t lo = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t hi = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t hi = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
   uint16_t addr_abs = (hi << 8) | lo;
@@ -698,11 +679,12 @@ uint8_t IND(CPU6502 *cpu) {
 } // Indirect
 //
 uint8_t IZX(CPU6502 *cpu) {
-  uint16_t addr = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t addr = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t lo = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
-  uint16_t hi = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
+  uint16_t lo = read_from_memory(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
+  uint16_t hi =
+      read_from_memory(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
 
   uint16_t addr_abs = (hi << 8) | lo;
 
@@ -711,11 +693,12 @@ uint8_t IZX(CPU6502 *cpu) {
 //
 //
 uint8_t IZY(CPU6502 *cpu) {
-  uint16_t addr = read_from_bus(cpu->bus, cpu->PC);
+  uint16_t addr = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t lo = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
-  uint16_t hi = read_from_bus(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
+  uint16_t lo = read_from_memory(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
+  uint16_t hi =
+      read_from_memory(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
 
   uint16_t addr_abs = (hi << 8) | lo;
 
@@ -723,8 +706,8 @@ uint8_t IZY(CPU6502 *cpu) {
 } // (Indirect,X)
 
 uint16_t read_ads_address(CPU6502 *cpu, uint16_t offset) {
-  uint16_t lo = (uint16_t)read_from_bus(cpu->bus, offset);
-  uint16_t hi = (uint16_t)read_from_bus(cpu->bus, offset + 1);
+  uint16_t lo = (uint16_t)read_from_memory(cpu->bus, offset);
+  uint16_t hi = (uint16_t)read_from_memory(cpu->bus, offset + 1);
 
   return (hi << 8) | lo;
 }

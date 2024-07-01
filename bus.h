@@ -12,9 +12,9 @@ typedef struct {
   uint8_t current_value;
 } Bus;
 
-void write_to_bus(Bus *bus, uint16_t addr, uint8_t data);
+void write_to_memory(Bus *bus, uint16_t addr, uint8_t data);
 
-uint8_t read_from_bus(Bus *bus, uint16_t addr);
+uint8_t read_from_memory(Bus *bus, uint16_t addr);
 
 void attach_cartridge_to_bus(Bus *bus, Mapper *mapper);
 
