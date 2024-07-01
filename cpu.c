@@ -404,29 +404,155 @@ uint8_t ORA(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t PHA(CPU6502 *cpu) { return 0; }
-uint8_t PHP(CPU6502 *cpu) { return 0; }
-uint8_t PLA(CPU6502 *cpu) { return 0; }
-uint8_t PLP(CPU6502 *cpu) { return 0; }
-uint8_t ROL(CPU6502 *cpu) { return 0; }
-uint8_t ROR(CPU6502 *cpu) { return 0; }
-uint8_t RTI(CPU6502 *cpu) { return 0; }
-uint8_t RTS(CPU6502 *cpu) { return 0; }
-uint8_t SBC(CPU6502 *cpu) { return 0; }
-uint8_t SEC(CPU6502 *cpu) { return 0; }
-uint8_t SED(CPU6502 *cpu) { return 0; }
-uint8_t SEI(CPU6502 *cpu) { return 0; }
-uint8_t STA(CPU6502 *cpu) { return 0; }
-uint8_t STX(CPU6502 *cpu) { return 0; }
-uint8_t STY(CPU6502 *cpu) { return 0; }
-uint8_t TAX(CPU6502 *cpu) { return 0; }
-uint8_t TAY(CPU6502 *cpu) { return 0; }
-uint8_t TSX(CPU6502 *cpu) { return 0; }
-uint8_t TXA(CPU6502 *cpu) { return 0; }
-uint8_t TXS(CPU6502 *cpu) { return 0; }
+uint8_t PHA(CPU6502 *cpu) {
+  write_to_bus(cpu->bus, 0x0100 + cpu->SP, cpu->A);
+
+  return 0;
+}
+
+uint8_t PHP(CPU6502 *cpu) {
+  write_to_bus(cpu->bus, 0x0100 + cpu->SP,
+               cpu->SR | 0x30); // Push status register with B flag set
+  cpu->SP--;
+  return 0;
+}
+
+uint8_t PLA(CPU6502 *cpu) {
+  cpu->SP++;
+  cpu->A = read_from_bus(cpu->bus, 0x0100 + cpu->SP);
+  set_flag(cpu, Z, cpu->A == 0);
+  set_flag(cpu, N, cpu->A & 0x80);
+  return 0;
+}
+
+uint8_t PLP(CPU6502 *cpu) {
+  cpu->SP++;
+  cpu->SR = read_from_bus(cpu->bus, 0x0100 + cpu->SP) & 0xEF |
+            0x20; // Restore status register with B flag clear
+  return 0;
+}
+
+uint8_t ROL(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = (cpu->bus->current_value << 1) | get_flag(cpu, C);
+  set_flag(cpu, C, temp & 0xFF00);
+  cpu->bus->current_value = temp & 0x00FF;
+  set_flag(cpu, Z, cpu->bus->current_value == 0);
+  set_flag(cpu, N, cpu->bus->current_value & 0x80);
+  return 0;
+}
+
+uint8_t ROR(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t temp = (get_flag(cpu, C) << 7) | (cpu->bus->current_value >> 1);
+  set_flag(cpu, C, cpu->bus->current_value & 0x01);
+  cpu->bus->current_value = temp & 0x00FF;
+  set_flag(cpu, Z, cpu->bus->current_value == 0);
+  set_flag(cpu, N, cpu->bus->current_value & 0x80);
+  return 0;
+}
+
+uint8_t RTI(CPU6502 *cpu) {
+  cpu->SP++;
+  cpu->SR = read_from_bus(cpu->bus, 0x0100 + cpu->SP) & 0xEF | 0x20;
+  cpu->SP++;
+  cpu->PC = read_from_bus(cpu->bus, 0x0100 + cpu->SP);
+  cpu->SP++;
+  cpu->PC |= (read_from_bus(cpu->bus, 0x0100 + cpu->SP) << 8);
+  return 0;
+}
+
+uint8_t RTS(CPU6502 *cpu) {
+  cpu->SP++;
+  cpu->PC = read_from_bus(cpu->bus, 0x0100 + cpu->SP);
+  cpu->SP++;
+  cpu->PC |= (read_from_bus(cpu->bus, 0x0100 + cpu->SP) << 8);
+  cpu->PC++;
+  return 0;
+}
+
+uint8_t SBC(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  uint16_t value = cpu->bus->current_value ^ 0x00FF;
+  uint16_t temp = (uint16_t)cpu->A + value + (uint16_t)get_flag(cpu, C);
+  set_flag(cpu, C, temp & 0xFF00);
+  set_flag(cpu, Z, (temp & 0x00FF) == 0);
+  set_flag(cpu, V, (temp ^ (uint16_t)cpu->A) & (temp ^ value) & 0x0080);
+  set_flag(cpu, N, temp & 0x0080);
+  cpu->A = temp & 0x00FF;
+  return 0;
+}
+
+uint8_t SEC(CPU6502 *cpu) {
+  set_flag(cpu, C, true);
+  return 0;
+}
+
+uint8_t SED(CPU6502 *cpu) {
+  set_flag(cpu, D, true);
+  return 0;
+}
+
+uint8_t SEI(CPU6502 *cpu) {
+  set_flag(cpu, I, true);
+  return 0;
+}
+
+uint8_t STA(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  cpu->bus->current_value = cpu->A;
+  return 0;
+}
+
+uint8_t STX(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  cpu->bus->current_value = cpu->X;
+  return 0;
+}
+
+uint8_t STY(CPU6502 *cpu) {
+  hold_current_value(cpu->bus, cpu->PC);
+  cpu->bus->current_value = cpu->Y;
+  return 0;
+}
+
+uint8_t TAX(CPU6502 *cpu) {
+  cpu->X = cpu->A;
+  set_flag(cpu, Z, cpu->X == 0);
+  set_flag(cpu, N, cpu->X & 0x80);
+  return 0;
+}
+
+uint8_t TAY(CPU6502 *cpu) {
+  cpu->Y = cpu->A;
+  set_flag(cpu, Z, cpu->Y == 0);
+  set_flag(cpu, N, cpu->Y & 0x80);
+  return 0;
+}
+
+uint8_t TSX(CPU6502 *cpu) {
+  cpu->X = cpu->SP;
+  set_flag(cpu, Z, cpu->X == 0);
+  set_flag(cpu, N, cpu->X & 0x80);
+  return 0;
+}
+
+uint8_t TXA(CPU6502 *cpu) {
+  cpu->A = cpu->X;
+  set_flag(cpu, Z, cpu->A == 0);
+  set_flag(cpu, N, cpu->A & 0x80);
+  return 0;
+}
+
+uint8_t TXS(CPU6502 *cpu) {
+  cpu->SP = cpu->X;
+  return 0;
+}
 
 uint8_t TYA(CPU6502 *cpu) {
   cpu->A = cpu->Y;
+  set_flag(cpu, Z, cpu->A == 0);
+  set_flag(cpu, N, cpu->A & 0x80);
   return 0;
 }
 
