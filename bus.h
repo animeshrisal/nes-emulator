@@ -22,5 +22,5 @@ void load_cartridge(Bus *bus, Cartridge *cartridge);
 
 uint16_t read_from_cartridge(Bus *bus, uint16_t addr);
 
-uint16_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr);
+uint8_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr);
 #endif

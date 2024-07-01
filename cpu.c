@@ -109,13 +109,13 @@ void reset_cpu(CPU6502 *cpu) {
   uint16_t addr_abs = 0xFFFC;
   uint16_t lo = read_from_memory(cpu->bus, addr_abs + 0);
   uint16_t hi = read_from_memory(cpu->bus, addr_abs + 1);
-  printf("%d", lo);
-  printf("%d", hi);
 
   cpu->PC = (hi << 8) | lo;
 }
 
-uint8_t get_opcode(Bus *bus, uint16_t addr) { return 1; }
+uint8_t get_opcode(Bus *bus, uint16_t addr) {
+  return read_from_memory(bus, addr);
+}
 
 int get_flag(CPU6502 *cpu, CPUStatusFlags flag) {
   return (cpu->SR >> flag) & 0x1;
@@ -254,22 +254,22 @@ uint8_t BVS(CPU6502 *cpu) {
 
 // clear carry flag
 uint8_t CLC(CPU6502 *cpu) {
-  set_flag(cpu, C, false);
+  set_flag(cpu, C, 0);
   return 0;
 };
 
 uint8_t CLD(CPU6502 *cpu) {
-  set_flag(cpu, D, false);
+  set_flag(cpu, D, 0);
   return 0;
 }
 
 uint8_t CLI(CPU6502 *cpu) {
-  set_flag(cpu, I, false);
+  set_flag(cpu, I, 0);
   return 0;
 }
 
 uint8_t CLV(CPU6502 *cpu) {
-  set_flag(cpu, V, false);
+  set_flag(cpu, V, 0);
   return 0;
 }
 
@@ -478,17 +478,17 @@ uint8_t SBC(CPU6502 *cpu) {
 }
 
 uint8_t SEC(CPU6502 *cpu) {
-  set_flag(cpu, C, true);
+  set_flag(cpu, C, 1);
   return 0;
 }
 
 uint8_t SED(CPU6502 *cpu) {
-  set_flag(cpu, D, true);
+  set_flag(cpu, D, 1);
   return 0;
 }
 
 uint8_t SEI(CPU6502 *cpu) {
-  set_flag(cpu, I, true);
+  set_flag(cpu, I, 1);
   return 0;
 }
 
@@ -555,9 +555,7 @@ uint8_t XXX(CPU6502 *cpu) { return 0; }
 void clock(CPU6502 *cpu, Bus *bus) {
   if (cpu->cycles == 0) {
 
-    printf("%d\n", cpu->PC);
     int opcode = get_opcode(bus, cpu->PC);
-    printf("%d\n", opcode);
     set_flag(cpu, U, 1);
     cpu->PC++;
 

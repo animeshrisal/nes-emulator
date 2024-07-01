@@ -36,7 +36,7 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
   if (fread(&nesHeader, sizeof(CartridgeHeader), 1, file) != 1) {
     perror("Error reading from NES header file!");
     fclose(file);
-  };
+  }
 
   if (nesHeader.signature[0] != 'N' || nesHeader.signature[1] != 'E' ||
       nesHeader.signature[2] != 'S' || nesHeader.signature[3] != '\x1A') {
@@ -71,9 +71,8 @@ uint16_t read_from_cartridge(Bus *bus, uint16_t addr) {
   return map_to_cartridge_address_range(bus->cartridge, addr);
 }
 
-uint16_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr) {
+uint8_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr) {
   uint16_t mapped_addr =
       addr & (cartridge->cartridgeHeader.prg_rom > 1 ? 0x7FFF : 0x3FFF);
-
   return cartridge->prgRomSize[mapped_addr];
 }
