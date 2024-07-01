@@ -1,31 +1,8 @@
-#include "./bus.h"
+#include "cartridge.h"
+#include "bus.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-void write_to_memory(Bus *bus, uint16_t addr, uint8_t data) {
-  if (addr >= 0x0000 && addr <= 0x0800) {
-    bus->memory[addr] = data;
-  };
-}
-
-uint8_t read_from_memory(Bus *bus, uint16_t addr) {
-  printf("%d\n", addr);
-  if (addr >= 0x0000 && addr <= 0x0800) {
-    return bus->memory[addr % 0x0800];
-  };
-
-  if (addr >= 0x8000) {
-    printf("reading from cartridge:");
-    return read_from_cartridge(bus, addr);
-  }
-
-  return bus->memory[addr];
-}
-
-void hold_current_value(Bus *bus, uint16_t addr) {
-  bus->current_value = read_from_memory(bus, addr);
-};
 
 void load_cartridge(Bus *bus, Cartridge *cartridge) {
   FILE *file = fopen("nestest.nes", "rb");
@@ -62,4 +39,14 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
   }
 
   fclose(file);
+
+  bus->cartridge = cartridge;
+}
+
+uint16_t read_from_cartridge(Bus *bus, uint16_t addr) {
+  return map_to_cartridge_address_range(bus->cartridge, addr);
+}
+
+uint16_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr) {
+  return addr & (cartridge->cartridgeHeader.prg_rom > 1 ? 0x7FFF : 0x3FFF);
 }
