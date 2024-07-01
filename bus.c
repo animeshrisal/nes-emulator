@@ -26,7 +26,7 @@ void hold_current_value(Bus *bus, uint16_t addr) {
 };
 
 void load_cartridge(Bus *bus, Cartridge *cartridge) {
-  FILE *file = fopen("nestest.nes", "rb");
+  FILE *file = fopen("official_only.nes", "rb");
   if (!file) {
     perror("Error opening file");
   };
@@ -43,9 +43,11 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
     perror("Not a valid nes cartridge");
   }
 
-  uint16_t prg_rom = nesHeader.prg_rom * PRG_ROM_SIZE;
-  uint16_t chr_rom = nesHeader.chr_rom * CHR_ROM_SIZE;
+  uint32_t prg_rom = nesHeader.prg_rom * PRG_ROM_SIZE;
+  uint32_t chr_rom = nesHeader.chr_rom * CHR_ROM_SIZE;
 
+  printf("%d\n", prg_rom);
+  printf("%d\n", nesHeader.chr_rom);
   cartridge->cartridgeHeader = nesHeader;
 
   cartridge->prgRomSize = malloc(prg_rom);
@@ -59,8 +61,6 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
   if (fread(cartridge->chrRomSize, chr_rom, 1, file) != 1) {
     perror("Error reading chr!");
   }
-
-  printf("%x\n", cartridge->cartridgeHeader.prg_rom);
 
   fclose(file);
 

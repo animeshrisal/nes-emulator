@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
   SDL_Delay(2000); // Wait for 2 seconds
   //
   */
-  int test = 2000;
+  int test = 255;
   while (test-- > 0) {
     onUpdate(&cpu);
   };
