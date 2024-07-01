@@ -63,3 +63,11 @@ void load_cartridge(Bus *bus, Cartridge *cartridge) {
 
   fclose(file);
 }
+
+uint16_t read_from_cartridge(Bus *bus, uint16_t addr) {
+  return map_to_cartridge_address_range(bus->cartridge, addr);
+}
+
+uint16_t map_to_cartridge_address_range(Cartridge *cartridge, uint16_t addr) {
+  return addr & (cartridge->cartridgeHeader.prg_rom > 1 ? 0x7FFF : 0x3FFF);
+}
