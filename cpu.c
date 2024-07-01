@@ -106,7 +106,7 @@ void create_cpu(CPU6502 *cpu, Bus *bus) {
 void reset_cpu(CPU6502 *cpu) {
 
   printf("READ\n");
-  uint16_t addr_abs = 0xFFFC;
+  uint16_t addr_abs = 0x0000;
   uint16_t lo = read_from_memory(cpu->bus, addr_abs + 0);
   uint16_t hi = read_from_memory(cpu->bus, addr_abs + 1);
 
@@ -231,7 +231,26 @@ uint8_t BPL(CPU6502 *cpu) {
   }
   return 0;
 }
-uint8_t BRK(CPU6502 *cpu) { return 0; }
+
+uint8_t BRK(CPU6502 *cpu) {
+  cpu->PC++;
+
+  set_flag(cpu, I, 1);
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, (cpu->PC >> 8) & 0x00FF);
+  cpu->SP--;
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, cpu->PC & 0x00FF);
+  cpu->SP--;
+
+  set_flag(cpu, B, 1);
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, cpu->SR);
+  cpu->SP--;
+  set_flag(cpu, B, 0);
+
+  cpu->PC = (uint16_t)read_from_memory(cpu->bus, 0xFFFE) |
+            ((uint16_t)read_from_memory(cpu->bus, 0xFFFF) << 8);
+  return 0;
+}
+
 uint8_t BVC(CPU6502 *cpu) {
   if (get_flag(cpu, V) == 0) {
     uint16_t addr_abs = 0xff00;
@@ -573,7 +592,7 @@ void clock(CPU6502 *cpu, Bus *bus) {
 };
 
 void reset(CPU6502 *cpu) {
-  cpu->PC = 0xff;
+  cpu->PC = 0xfffc;
   cpu->A = 0;
   cpu->X = 0;
   cpu->Y = 0;
