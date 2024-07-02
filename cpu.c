@@ -129,7 +129,7 @@ void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bools) {
   }
 }
 
-uint8_t ADC(CPU6502 *cpu) {
+uint8_t ADC(CPU6502 *cpu, uint16_t addr) {
   uint8_t current_value = read_from_memory(cpu->bus, cpu->PC);
   uint16_t temp =
       (uint16_t)cpu->A + (uint16_t)current_value + (uint16_t)get_flag(cpu, C);
@@ -146,7 +146,7 @@ uint8_t ADC(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t AND(CPU6502 *cpu) {
+uint8_t AND(CPU6502 *cpu, uint16_t addr) {
   uint8_t value = read_from_memory(cpu->bus, cpu->PC);
   cpu->A &= value;
 
@@ -156,13 +156,13 @@ uint8_t AND(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t ASL(CPU6502 *cpu) {
+uint8_t ASL(CPU6502 *cpu, uint16_t addr) {
   uint8_t value = read_from_memory(cpu->bus, cpu->PC);
   uint16_t temp = value << 1;
   return 0;
 }
 
-uint8_t BCC(CPU6502 *cpu) {
+uint8_t BCC(CPU6502 *cpu, uint16_t addr) {
   if (get_flag(cpu, B) == 0) {
     uint16_t addr_abs = 0xff00;
     cpu->cycles++;
@@ -172,7 +172,7 @@ uint8_t BCC(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BCS(CPU6502 *cpu) {
+uint8_t BCS(CPU6502 *cpu, uint16_t addr) {
 
   if (get_flag(cpu, C) == 1) {
     uint16_t addr_abs = 0xff00;
@@ -184,7 +184,7 @@ uint8_t BCS(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BEQ(CPU6502 *cpu) {
+uint8_t BEQ(CPU6502 *cpu, uint16_t addr) {
 
   if (get_flag(cpu, Z) == 1) {
     uint16_t addr_abs = 0xff00;
@@ -196,9 +196,9 @@ uint8_t BEQ(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BIT(CPU6502 *cpu) { return 0; }
+uint8_t BIT(CPU6502 *cpu, uint16_t addr) { return 0; }
 
-uint8_t BMI(CPU6502 *cpu) {
+uint8_t BMI(CPU6502 *cpu, uint16_t addr) {
 
   if (get_flag(cpu, N) == 1) {
     uint16_t addr_abs = 0xff00;
@@ -210,7 +210,7 @@ uint8_t BMI(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BNE(CPU6502 *cpu) {
+uint8_t BNE(CPU6502 *cpu, uint16_t addr) {
   if (get_flag(cpu, Z) == 0) {
     uint16_t addr_abs = 0xff00;
     cpu->cycles++;
@@ -220,7 +220,7 @@ uint8_t BNE(CPU6502 *cpu) {
 
   return 0;
 }
-uint8_t BPL(CPU6502 *cpu) {
+uint8_t BPL(CPU6502 *cpu, uint16_t addr) {
   if (get_flag(cpu, N) == 0) {
     uint16_t addr_abs = 0xff00;
     cpu->cycles++;
@@ -230,7 +230,7 @@ uint8_t BPL(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BRK(CPU6502 *cpu) {
+uint8_t BRK(CPU6502 *cpu, uint16_t addr) {
   cpu->PC++;
 
   set_flag(cpu, I, 1);
@@ -249,7 +249,7 @@ uint8_t BRK(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BVC(CPU6502 *cpu) {
+uint8_t BVC(CPU6502 *cpu, uint16_t addr) {
   if (get_flag(cpu, V) == 0) {
     uint16_t addr_abs = 0xff00;
     cpu->cycles++;
@@ -259,7 +259,7 @@ uint8_t BVC(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t BVS(CPU6502 *cpu) {
+uint8_t BVS(CPU6502 *cpu, uint16_t addr) {
   if (get_flag(cpu, V) == 0) {
     uint16_t addr_abs = 0xff00;
     cpu->cycles++;
@@ -270,27 +270,27 @@ uint8_t BVS(CPU6502 *cpu) {
 }
 
 // clear carry flag
-uint8_t CLC(CPU6502 *cpu) {
+uint8_t CLC(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, C, 0);
   return 0;
 };
 
-uint8_t CLD(CPU6502 *cpu) {
+uint8_t CLD(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, D, 0);
   return 0;
 }
 
-uint8_t CLI(CPU6502 *cpu) {
+uint8_t CLI(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, I, 0);
   return 0;
 }
 
-uint8_t CLV(CPU6502 *cpu) {
+uint8_t CLV(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, V, 0);
   return 0;
 }
 
-uint8_t CMP(CPU6502 *cpu) {
+uint8_t CMP(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = (uint16_t)cpu->A - (uint16_t)cpu->bus->current_value;
   set_flag(cpu, C, cpu->A >= cpu->bus->current_value);
@@ -299,7 +299,7 @@ uint8_t CMP(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t CPX(CPU6502 *cpu) {
+uint8_t CPX(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = (uint16_t)cpu->X - (uint16_t)cpu->bus->current_value;
   set_flag(cpu, C, cpu->X >= cpu->bus->current_value);
@@ -308,7 +308,7 @@ uint8_t CPX(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t CPY(CPU6502 *cpu) {
+uint8_t CPY(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = (uint16_t)cpu->Y - (uint16_t)cpu->bus->current_value;
   set_flag(cpu, C, cpu->Y >= cpu->bus->current_value);
@@ -317,7 +317,7 @@ uint8_t CPY(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t DEC(CPU6502 *cpu) {
+uint8_t DEC(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   cpu->bus->current_value--;
   set_flag(cpu, Z, cpu->bus->current_value == 0);
@@ -325,21 +325,21 @@ uint8_t DEC(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t DEX(CPU6502 *cpu) {
+uint8_t DEX(CPU6502 *cpu, uint16_t addr) {
   cpu->X--;
   set_flag(cpu, Z, cpu->X == 0);
   set_flag(cpu, N, cpu->X & 0x80);
   return 0;
 }
 
-uint8_t DEY(CPU6502 *cpu) {
+uint8_t DEY(CPU6502 *cpu, uint16_t addr) {
   cpu->Y--;
   set_flag(cpu, Z, cpu->Y == 0);
   set_flag(cpu, N, cpu->Y & 0x80);
   return 0;
 }
 
-uint8_t EOR(CPU6502 *cpu) {
+uint8_t EOR(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   cpu->A ^= cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0);
@@ -347,7 +347,7 @@ uint8_t EOR(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t INC(CPU6502 *cpu) {
+uint8_t INC(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = cpu->bus->current_value + 1;
   set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
@@ -355,7 +355,7 @@ uint8_t INC(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t INX(CPU6502 *cpu) {
+uint8_t INX(CPU6502 *cpu, uint16_t addr) {
   cpu->X++;
   set_flag(cpu, Z, cpu->X == 0x00);
   set_flag(cpu, N, cpu->X & 0x80);
@@ -363,7 +363,7 @@ uint8_t INX(CPU6502 *cpu) {
   return 0;
 };
 
-uint8_t INY(CPU6502 *cpu) {
+uint8_t INY(CPU6502 *cpu, uint16_t addr) {
   cpu->Y++;
   set_flag(cpu, Z, cpu->Y == 0x00);
   set_flag(cpu, N, cpu->Y & 0x80);
@@ -371,32 +371,32 @@ uint8_t INY(CPU6502 *cpu) {
   return 0;
 };
 
-uint8_t JMP(CPU6502 *cpu) {
+uint8_t JMP(CPU6502 *cpu, uint16_t addr) {
   uint8_t addr_abs = 0xFF;
   cpu->PC = addr_abs;
 
   return 0;
 }
 
-uint8_t JSR(CPU6502 *cpu) { return 0; }
+uint8_t JSR(CPU6502 *cpu, uint16_t addr) { return 0; }
 
-uint8_t LDA(CPU6502 *cpu) {
+uint8_t LDA(CPU6502 *cpu, uint16_t addr) {
   cpu->A = 0xf;
   set_flag(cpu, Z, cpu->A == 0x00);
   return 0;
 };
 
-uint8_t LDX(CPU6502 *cpu) {
+uint8_t LDX(CPU6502 *cpu, uint16_t addr) {
   cpu->X = cpu->A;
   return 0;
 }
 
-uint8_t LDY(CPU6502 *cpu) {
+uint8_t LDY(CPU6502 *cpu, uint16_t addr) {
   cpu->Y = cpu->A;
   return 0;
 }
 
-uint8_t LSR(CPU6502 *cpu) {
+uint8_t LSR(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   set_flag(cpu, C, cpu->bus->current_value & 0x01);
   cpu->bus->current_value >>= 1;
@@ -405,9 +405,9 @@ uint8_t LSR(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t NOP(CPU6502 *cpu) { return 0; }
+uint8_t NOP(CPU6502 *cpu, uint16_t addr) { return 0; }
 
-uint8_t ORA(CPU6502 *cpu) {
+uint8_t ORA(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   cpu->A |= cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0);
@@ -415,20 +415,20 @@ uint8_t ORA(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t PHA(CPU6502 *cpu) {
+uint8_t PHA(CPU6502 *cpu, uint16_t addr) {
   write_to_memory(cpu->bus, 0x0100 + cpu->SP, cpu->A);
 
   return 0;
 }
 
-uint8_t PHP(CPU6502 *cpu) {
+uint8_t PHP(CPU6502 *cpu, uint16_t addr) {
   write_to_memory(cpu->bus, 0x0100 + cpu->SP,
                   cpu->SR | 0x30); // Push status register with B flag set
   cpu->SP--;
   return 0;
 }
 
-uint8_t PLA(CPU6502 *cpu) {
+uint8_t PLA(CPU6502 *cpu, uint16_t addr) {
   cpu->SP++;
   cpu->A = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
   set_flag(cpu, Z, cpu->A == 0);
@@ -436,14 +436,14 @@ uint8_t PLA(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t PLP(CPU6502 *cpu) {
+uint8_t PLP(CPU6502 *cpu, uint16_t addr) {
   cpu->SP++;
   cpu->SR = read_from_memory(cpu->bus, 0x0100 + cpu->SP) & 0xEF |
             0x20; // Restore status register with B flag clear
   return 0;
 }
 
-uint8_t ROL(CPU6502 *cpu) {
+uint8_t ROL(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = (cpu->bus->current_value << 1) | get_flag(cpu, C);
   set_flag(cpu, C, temp & 0xFF00);
@@ -453,7 +453,7 @@ uint8_t ROL(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t ROR(CPU6502 *cpu) {
+uint8_t ROR(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t temp = (get_flag(cpu, C) << 7) | (cpu->bus->current_value >> 1);
   set_flag(cpu, C, cpu->bus->current_value & 0x01);
@@ -463,7 +463,7 @@ uint8_t ROR(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t RTI(CPU6502 *cpu) {
+uint8_t RTI(CPU6502 *cpu, uint16_t addr) {
   cpu->SP++;
   cpu->SR = read_from_memory(cpu->bus, 0x0100 + cpu->SP) & 0xEF | 0x20;
   cpu->SP++;
@@ -473,7 +473,7 @@ uint8_t RTI(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t RTS(CPU6502 *cpu) {
+uint8_t RTS(CPU6502 *cpu, uint16_t addr) {
   cpu->SP++;
   cpu->PC = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
   cpu->SP++;
@@ -482,7 +482,7 @@ uint8_t RTS(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t SBC(CPU6502 *cpu) {
+uint8_t SBC(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   uint16_t value = cpu->bus->current_value ^ 0x00FF;
   uint16_t temp = (uint16_t)cpu->A + value + (uint16_t)get_flag(cpu, C);
@@ -494,80 +494,80 @@ uint8_t SBC(CPU6502 *cpu) {
   return 0;
 }
 
-uint8_t SEC(CPU6502 *cpu) {
+uint8_t SEC(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, C, 1);
   return 0;
 }
 
-uint8_t SED(CPU6502 *cpu) {
+uint8_t SED(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, D, 1);
   return 0;
 }
 
-uint8_t SEI(CPU6502 *cpu) {
+uint8_t SEI(CPU6502 *cpu, uint16_t addr) {
   set_flag(cpu, I, 1);
   return 0;
 }
 
-uint8_t STA(CPU6502 *cpu) {
+uint8_t STA(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   cpu->bus->current_value = cpu->A;
   return 0;
 }
 
-uint8_t STX(CPU6502 *cpu) {
+uint8_t STX(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   cpu->bus->current_value = cpu->X;
   return 0;
 }
 
-uint8_t STY(CPU6502 *cpu) {
+uint8_t STY(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, cpu->PC);
   cpu->bus->current_value = cpu->Y;
   return 0;
 }
 
-uint8_t TAX(CPU6502 *cpu) {
+uint8_t TAX(CPU6502 *cpu, uint16_t addr) {
   cpu->X = cpu->A;
   set_flag(cpu, Z, cpu->X == 0);
   set_flag(cpu, N, cpu->X & 0x80);
   return 0;
 }
 
-uint8_t TAY(CPU6502 *cpu) {
+uint8_t TAY(CPU6502 *cpu, uint16_t addr) {
   cpu->Y = cpu->A;
   set_flag(cpu, Z, cpu->Y == 0);
   set_flag(cpu, N, cpu->Y & 0x80);
   return 0;
 }
 
-uint8_t TSX(CPU6502 *cpu) {
+uint8_t TSX(CPU6502 *cpu, uint16_t addr) {
   cpu->X = cpu->SP;
   set_flag(cpu, Z, cpu->X == 0);
   set_flag(cpu, N, cpu->X & 0x80);
   return 0;
 }
 
-uint8_t TXA(CPU6502 *cpu) {
+uint8_t TXA(CPU6502 *cpu, uint16_t addr) {
   cpu->A = cpu->X;
   set_flag(cpu, Z, cpu->A == 0);
   set_flag(cpu, N, cpu->A & 0x80);
   return 0;
 }
 
-uint8_t TXS(CPU6502 *cpu) {
+uint8_t TXS(CPU6502 *cpu, uint16_t addr) {
   cpu->SP = cpu->X;
   return 0;
 }
 
-uint8_t TYA(CPU6502 *cpu) {
+uint8_t TYA(CPU6502 *cpu, uint16_t addr) {
   cpu->A = cpu->Y;
   set_flag(cpu, Z, cpu->A == 0);
   set_flag(cpu, N, cpu->A & 0x80);
   return 0;
 }
 
-uint8_t XXX(CPU6502 *cpu) { return 0; }
+uint8_t XXX(CPU6502 *cpu, uint16_t addr) { return 0; }
 
 void clock(CPU6502 *cpu, Bus *bus) {
   if (cpu->cycles == 0) {
@@ -580,10 +580,10 @@ void clock(CPU6502 *cpu, Bus *bus) {
     printf("%s\n", instruction.name);
     cpu->cycles = instruction.cycles;
 
-    uint8_t addrmode_additional_cycles = instruction.addrmode(cpu);
-    uint8_t opmode_additional_cycles = instruction.opcode(cpu);
+    uint16_t get_address = instruction.addrmode(cpu);
+    uint8_t opmode_additional_cycles = instruction.opcode(cpu, get_address);
 
-    cpu->cycles += addrmode_additional_cycles & opmode_additional_cycles;
+    cpu->cycles += opmode_additional_cycles;
   }
 
   cpu->cycles--;
@@ -645,36 +645,36 @@ void nmi(CPU6502 *cpu) {
   cpu->cycles = 8;
 };
 
-uint8_t IMP(CPU6502 *cpu) { return 0; }
+uint16_t IMP(CPU6502 *cpu) { return 0; }
 
 // uses the next byte in the program counter as a value;
-uint8_t IMM(CPU6502 *cpu) {
+uint16_t IMM(CPU6502 *cpu) {
   cpu->PC++;
   return cpu->PC;
 } // Immediate
 //
-uint8_t ZP0(CPU6502 *cpu) {
+uint16_t ZP0(CPU6502 *cpu) {
   uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
   addr_abs &= 0x00FF;
   return addr_abs;
 } // Zero Page
 //
-uint8_t ZPX(CPU6502 *cpu) {
+uint16_t ZPX(CPU6502 *cpu) {
   uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC) + cpu->X;
   cpu->PC++;
-  addr_abs = 0x00FF;
-  return 0;
+  addr_abs &= 0x00FF;
+  return addr_abs;
 } // Zero Page,X
 
-uint8_t ZPY(CPU6502 *cpu) {
+uint16_t ZPY(CPU6502 *cpu) {
   uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC) + cpu->Y;
   cpu->PC++;
-  addr_abs = 0x00FF;
+  addr_abs &= 0x00FF;
   return 0;
 } // Zero Page,Y
 //
-uint8_t REL(CPU6502 *cpu) {
+uint16_t REL(CPU6502 *cpu) {
   uint16_t addr_rel = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
@@ -686,19 +686,17 @@ uint8_t REL(CPU6502 *cpu) {
 } // Relative
 //
 //
-uint8_t ABS(CPU6502 *cpu) {
+uint16_t ABS(CPU6502 *cpu) {
   uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
   uint16_t hi = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t addr_abs = (hi << 8) | lo;
-
-  return 0;
+  return (hi << 8) | lo;
 } // Absolute
 //
-uint8_t ABX(CPU6502 *cpu) {
+uint16_t ABX(CPU6502 *cpu) {
   uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
@@ -708,10 +706,11 @@ uint8_t ABX(CPU6502 *cpu) {
   uint16_t addr_abs = (hi << 8) | lo;
   addr_abs += cpu->X;
 
-  return 0;
+  return addr_abs;
 } // Absolute,X
 //
-uint8_t ABY(CPU6502 *cpu) {
+//
+uint16_t ABY(CPU6502 *cpu) {
   uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
@@ -721,9 +720,10 @@ uint8_t ABY(CPU6502 *cpu) {
   uint16_t addr_abs = (hi << 8) | lo;
   addr_abs += cpu->Y;
 
-  return 0;
+  return addr_abs;
 } // Absolute,Y
-uint8_t IND(CPU6502 *cpu) {
+
+uint16_t IND(CPU6502 *cpu) {
   uint16_t lo = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
@@ -731,10 +731,10 @@ uint8_t IND(CPU6502 *cpu) {
   cpu->PC++;
 
   uint16_t addr_abs = (hi << 8) | lo;
-  return 0;
+  return addr_abs;
 } // Indirect
-//
-uint8_t IZX(CPU6502 *cpu) {
+
+uint16_t IZX(CPU6502 *cpu) {
   uint16_t addr = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
@@ -744,11 +744,11 @@ uint8_t IZX(CPU6502 *cpu) {
 
   uint16_t addr_abs = (hi << 8) | lo;
 
-  return 0;
+  return addr_abs;
 } // (Indirect,X)
 //
 //
-uint8_t IZY(CPU6502 *cpu) {
+uint16_t IZY(CPU6502 *cpu) {
   uint16_t addr = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
@@ -758,7 +758,7 @@ uint8_t IZY(CPU6502 *cpu) {
 
   uint16_t addr_abs = (hi << 8) | lo;
 
-  return 0;
+  return addr_abs;
 } // (Indirect,X)
 
 uint16_t read_ads_address(CPU6502 *cpu, uint16_t offset) {
