@@ -215,7 +215,7 @@ uint8_t BEQ(CPU6502 *cpu, uint16_t addr) {
   return 0;
 }
 
-uint8_t BIT(CPU6502 *cpu, uint16_t addr) { return 0; }
+uint8_t BIT(CPU6502 *cpu, uint16_t addr) {}
 
 uint8_t BMI(CPU6502 *cpu, uint16_t addr) {
 
@@ -774,7 +774,6 @@ uint16_t IZY(CPU6502 *cpu) {
   return addr_abs;
 } // (Indirect,X)
 //
-uint16 get_relative_address(CPU6502 *cpu) {}
 
 uint16_t read_ads_address(CPU6502 *cpu, uint16_t offset) {
   uint16_t lo = (uint16_t)read_from_memory(cpu->bus, offset);
