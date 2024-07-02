@@ -684,7 +684,7 @@ uint16_t ZPY(CPU6502 *cpu) {
   uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC) + cpu->Y;
   cpu->PC++;
   addr_abs &= 0x00FF;
-  return 0;
+  return addr_abs;
 } // Zero Page,Y
 //
 uint16_t REL(CPU6502 *cpu) {
@@ -695,7 +695,7 @@ uint16_t REL(CPU6502 *cpu) {
     addr_rel |= 0xFF00;
   }
 
-  return 0;
+  return addr_rel;
 } // Relative
 //
 //
@@ -772,7 +772,7 @@ uint16_t IZY(CPU6502 *cpu) {
   uint16_t addr_abs = (hi << 8) | lo;
 
   return addr_abs;
-} // (Indirect,X)
+} // (Indirect,Y)
 //
 
 uint16_t read_ads_address(CPU6502 *cpu, uint16_t offset) {
