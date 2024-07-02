@@ -130,13 +130,13 @@ void set_flag(CPU6502 *cpu, CPUStatusFlags flag, int bools) {
 }
 
 uint8_t ADC(CPU6502 *cpu) {
-  hold_current_value(cpu->bus, cpu->PC);
-  uint16_t temp = (uint16_t)cpu->A + (uint16_t)cpu->bus->current_value +
-                  (uint16_t)get_flag(cpu, C);
+  uint8_t current_value = read_from_memory(cpu->bus, cpu->PC);
+  uint16_t temp =
+      (uint16_t)cpu->A + (uint16_t)current_value + (uint16_t)get_flag(cpu, C);
 
   set_flag(cpu, C, temp > 255);
   set_flag(cpu, V,
-           (~((uint16_t)cpu->A ^ (uint16_t)cpu->bus->current_value) &
+           (~((uint16_t)cpu->A ^ (uint16_t)current_value) &
             ((uint16_t)cpu->A ^ (uint16_t)temp)) &
                0x0080);
 
@@ -147,9 +147,7 @@ uint8_t ADC(CPU6502 *cpu) {
 }
 
 uint8_t AND(CPU6502 *cpu) {
-  hold_current_value(cpu->bus, cpu->PC);
-
-  uint8_t value = cpu->bus->current_value;
+  uint8_t value = read_from_memory(cpu->bus, cpu->PC);
   cpu->A &= value;
 
   set_flag(cpu, C, cpu->A > 255);
@@ -159,8 +157,8 @@ uint8_t AND(CPU6502 *cpu) {
 }
 
 uint8_t ASL(CPU6502 *cpu) {
-  hold_current_value(cpu->bus, cpu->PC);
-  uint16_t temp = cpu->bus->current_value << 1;
+  uint8_t value = read_from_memory(cpu->bus, cpu->PC);
+  uint16_t temp = value << 1;
   return 0;
 }
 
@@ -601,30 +599,49 @@ void reset(CPU6502 *cpu) {
 
 void irq(CPU6502 *cpu, CPUStatusFlags flag) {
   if (get_flag(cpu, flag) == 0) {
-    // write(0x0100 + cpu->SP--, (cpu->PC >> 8) & 0x00FF);
+    write_to_memory(cpu->bus, 0x0100 + cpu->SP--, (cpu->PC >> 8) & 0x00FF);
     cpu->SP--;
 
-    // write(0x0100 + cpu->SP--, cpu->PC & 0x00FF);
+    write_to_memory(cpu->bus, 0x0100 + cpu->SP--, cpu->PC & 0x00FF);
     cpu->SP--;
 
     set_flag(cpu, B, 0);
     set_flag(cpu, U, 1);
     set_flag(cpu, I, 1);
-    // write(0x0100 + cpu->SP, cpu->SR);
+    write_to_memory(cpu->bus, 0x0100 + cpu->SP, cpu->SR);
+
+    cpu->SP--;
+
+    uint16_t addr_abs = 0xFFFE;
+    uint16_t lo = read_from_memory(cpu->bus, addr_abs);
+    uint16_t hi = read_from_memory(cpu->bus, addr_abs + 1);
+
+    cpu->PC = (hi << 8) | lo;
+    cpu->cycles = 7;
   }
 };
 
 // non-maskable interrupt
 void nmi(CPU6502 *cpu) {
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP--, (cpu->PC >> 8) & 0x00FF);
+  cpu->SP--;
+
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP--, cpu->PC & 0x00FF);
+  cpu->SP--;
+
   set_flag(cpu, B, 0);
   set_flag(cpu, U, 1);
   set_flag(cpu, I, 1);
 
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, cpu->SR);
+  cpu->SP--;
+
   uint16_t addr_abs = 0xFFFA;
-  uint16_t lo = 0xFFAA;
-  uint16_t hi = 0xFFAA;
+  uint16_t lo = read_from_memory(cpu->bus, addr_abs);
+  uint16_t hi = read_from_memory(cpu->bus, addr_abs + 1);
 
   cpu->PC = (hi << 8) | lo;
+
   cpu->cycles = 8;
 };
 
@@ -633,14 +650,14 @@ uint8_t IMP(CPU6502 *cpu) { return 0; }
 // uses the next byte in the program counter as a value;
 uint8_t IMM(CPU6502 *cpu) {
   cpu->PC++;
-  return 0;
+  return cpu->PC;
 } // Immediate
 //
 uint8_t ZP0(CPU6502 *cpu) {
   uint16_t addr_abs = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
   addr_abs &= 0x00FF;
-  return 0;
+  return addr_abs;
 } // Zero Page
 //
 uint8_t ZPX(CPU6502 *cpu) {
