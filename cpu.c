@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
 static Instructions LOOKUP[16 * 16] = {
     {"BRK", BRK, IMP, 7}, {"ORA", ORA, IZX, 6}, {"???", XXX, IMP, 2},
@@ -478,11 +479,18 @@ uint8_t ROR(CPU6502 *cpu, uint16_t addr) {
 
 uint8_t RTI(CPU6502 *cpu, uint16_t addr) {
   cpu->SP++;
-  cpu->SR = read_from_memory(cpu->bus, 0x0100 + cpu->SP) & 0xEF | 0x20;
+  cpu->SR = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
+
+  cpu->SR &= ~B;
+  cpu->SR &= ~U;
+
   cpu->SP++;
-  cpu->PC = read_from_memory(cpu->bus, 0x0100 + cpu->SP);
+
+  cpu->PC = (uint16_t)read_from_memory(cpu->bus, 0x0100 + cpu->SP);
   cpu->SP++;
-  cpu->PC |= (read_from_memory(cpu->bus, 0x0100 + cpu->SP) << 8);
+
+  cpu->PC |= (uint16_t)read_from_memory(cpu->bus, 0x0100 + cpu->SP) << 8;
+
   return 0;
 }
 
