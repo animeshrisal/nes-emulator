@@ -361,7 +361,7 @@ uint8_t EOR(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t INC(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, cpu->PC);
+  hold_current_value(cpu->bus, addr);
   uint16_t temp = cpu->bus->current_value + 1;
   set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
   set_flag(cpu, N, temp & 0x0080);
@@ -409,11 +409,12 @@ uint8_t LDY(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t LSR(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, cpu->PC);
-  set_flag(cpu, C, cpu->bus->current_value & 0x01);
-  cpu->bus->current_value >>= 1;
-  set_flag(cpu, Z, cpu->bus->current_value == 0);
-  set_flag(cpu, N, cpu->bus->current_value & 0x80);
+  hold_current_value(cpu->bus, addr);
+  uint8_t value = cpu->bus->current_value;
+  set_flag(cpu, C, value & 0x0001);
+  uint8_t temp = value >> 1;
+  set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
+  set_flag(cpu, N, (temp & 0x0080));
   return 0;
 }
 
@@ -596,7 +597,7 @@ void clock(CPU6502 *cpu, Bus *bus) {
     uint16_t get_address = instruction.addrmode(cpu);
     uint8_t opmode_additional_cycles = instruction.opcode(cpu, get_address);
 
-    cpu->cycles += opmode_additional_cycles;
+    // cpu->cycles += opmode_additional_cycles;
   }
 
   cpu->cycles--;
