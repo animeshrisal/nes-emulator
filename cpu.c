@@ -599,6 +599,7 @@ void clock(CPU6502 *cpu, Bus *bus) {
 
     Instructions instruction = LOOKUP[opcode];
     printf("%s\n", instruction.name);
+    printf("%x\n", cpu->PC);
     cpu->cycles = instruction.cycles;
     strcpy(cpu->current_addressing_mode, instruction.name);
 

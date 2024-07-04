@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -pedantic -Wno-return-type
-LIBS = `sdl2-config --cflags --libs`
+LIBS = `sdl2-config --cflags --libs` -lSDL2_ttf
 
 # List of source files
 SRCS = $(wildcard *.c)
