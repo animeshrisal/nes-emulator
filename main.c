@@ -1,6 +1,7 @@
 #include "./cpu.h"
 #include "./viewer.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
 #include <SDL2/SDL_ttf.h>
@@ -54,19 +55,42 @@ int main(int argc, char *argv[]) {
   SDL_Texture *message;
 
   initDisplay(renderer, &font);
+  int quit = 0;
+  SDL_Event event;
+
+  while (!quit) {
+    while (SDL_PollEvent(&event)) {
+      switch (event.type) {
+      case SDL_KEYDOWN:
+        do {
+          onUpdate(&cpu);
+          display_cpu_info(renderer, &cpu, font);
+          display_instructions(renderer, &cpu, font, code);
+          SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
+          SDL_RenderPresent(renderer);
+
+          SDL_RenderClear(renderer);
+        } while (cpu.cycles == 0);
+
+        do {
+          onUpdate(&cpu);
+          display_cpu_info(renderer, &cpu, font);
+          display_instructions(renderer, &cpu, font, code);
+          SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
+          SDL_RenderPresent(renderer);
+
+          SDL_RenderClear(renderer);
+        } while (cpu.cycles != 0);
+
+        break;
+      case SDL_QUIT:
+        quit = 1;
+        break;
+      }
+    }
+  }
 
   while (test-- > 0) {
-
-    message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
-    SDL_FreeSurface(surfaceMessage);
-
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, message, NULL, &message_rect);
-    onUpdate(&cpu);
-    display_cpu_info(renderer, &cpu, font);
-    display_instructions(renderer, &cpu, font, code);
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
-    SDL_RenderPresent(renderer);
   };
 
   SDL_DestroyRenderer(renderer);

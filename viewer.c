@@ -56,7 +56,7 @@ void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
       sprintf(str, "%s", code[addr]);
 
       // todo: improve this
-      display_text(renderer, font, str, 400, 200 - 40 * (5 - prevInstructions));
+      display_text(renderer, font, str, 400, 200 - 50 * (5 - prevInstructions));
       prevInstructions--;
     }
   }
@@ -68,7 +68,7 @@ void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
       sprintf(str, "%s", code[addr]);
 
       // todo: improve this
-      display_text(renderer, font, str, 400, 200 + 40 * (5 - nextInstructions));
+      display_text(renderer, font, str, 400, 200 + 50 * (5 - nextInstructions));
       nextInstructions--;
     }
   }
@@ -95,8 +95,6 @@ void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {
   display_flag(renderer, font, "I", cpu->SR & I, 10, y);
   y += 40;
   display_flag(renderer, font, "D", cpu->SR & D, 10, y);
-  y += 40;
-  display_flag(renderer, font, "B", cpu->SR & B, 10, y);
   y += 40;
   display_flag(renderer, font, "U", cpu->SR & U, 10, y);
   y += 40;
