@@ -9,3 +9,6 @@ void initDisplay(SDL_Renderer *renderer, TTF_Font **font);
 void display_message(SDL_Renderer *renderer);
 
 void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font);
+
+void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
+                          char (*code)[100]);

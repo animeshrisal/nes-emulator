@@ -44,21 +44,13 @@ void display_flag(SDL_Renderer *renderer, TTF_Font *font, const char *name,
   display_text(renderer, font, str, x, y);
 }
 
-void display_instruction() {};
-
-void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu,
-                          TTF_Font *font) {
+void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
+                          char (*code)[100]) {
+  int prevInstructions = 5;
+  int nextInstructions = 5;
   char str[100];
-  uint16_t addr = cpu->PC;
-  int opcode = get_opcode(cpu->bus, addr);
-  printf("%02x \n", opcode);
-  if (opcode) {
-    Instructions instr = LOOKUP[addr];
-    printf("%s\n", instr.name);
-
-    sprintf(str, "%04X: %s", addr, instr.name);
-    display_text(renderer, font, str, 450, 10);
-  }
+  sprintf(str, "%s", code[cpu->PC]);
+  display_text(renderer, font, str, 200, 200);
 }
 
 void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {
@@ -90,6 +82,4 @@ void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {
   display_flag(renderer, font, "V", cpu->SR & V, 10, y);
   y += 40;
   display_flag(renderer, font, "N", cpu->SR & N, 10, y);
-
-  display_instructions(renderer, cpu, font);
 }

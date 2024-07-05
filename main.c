@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
     SDL_RenderCopy(renderer, message, NULL, &message_rect);
     onUpdate(&cpu);
     display_cpu_info(renderer, &cpu, font);
+    display_instructions(renderer, &cpu, font, code);
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
     SDL_RenderPresent(renderer);
   };
