@@ -90,8 +90,9 @@ uint8_t ASL(CPU6502 *cpu, uint16_t addr) {
 uint8_t BCC(CPU6502 *cpu, uint16_t addr) {
   if (get_flag(cpu, C) == 0) {
     cpu->cycles++;
-    uint16_t addr_abs = cpu->PC + addr;
 
+    uint16_t addr_abs = cpu->PC + addr;
+    printf("%04x %04x\n", cpu->PC, addr);
     if ((addr_abs & 0xFF00) != (cpu->PC & 0xFF00)) {
       cpu->cycles++;
     }
@@ -515,8 +516,7 @@ void clock(CPU6502 *cpu, Bus *bus) {
     cpu->PC++;
 
     Instructions instruction = LOOKUP[opcode];
-    printf("%s\n", instruction.name);
-    printf("%x\n", cpu->PC);
+
     cpu->cycles = instruction.cycles;
     strcpy(cpu->current_addressing_mode, instruction.name);
 
@@ -714,7 +714,7 @@ void onUpdate(CPU6502 *cpu) { clock(cpu, cpu->bus); };
 void prepare_code(char (*code)[100], CPU6502 *cpu) {
   char str[15];
   uint8_t lo = 0x00, hi = 0x00;
-  uint8_t value = 0x00;
+  uint16_t value = 0x0000;
   uint16_t addr = 0x8000;
   while (addr >= 0x8000 && addr <= 0xffff) {
     int opcode = get_opcode(cpu->bus, addr);
@@ -748,9 +748,14 @@ void prepare_code(char (*code)[100], CPU6502 *cpu) {
 
     } else if (instr.addrmode == &REL) {
       value = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%02X [$%04X]", current_address,
-              instr.name, value, addr + value);
       addr++;
+
+      if (value & 0x80) {
+        value |= 0xFF00;
+      }
+
+      sprintf(code[current_address], "%04X: %s {$%04X}", current_address,
+              instr.name, (uint16_t)(addr + value));
 
     } else if (instr.addrmode == &ABS) {
       lo = read_from_memory(cpu->bus, addr);

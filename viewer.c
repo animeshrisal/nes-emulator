@@ -54,7 +54,6 @@ void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
   while (prevInstructions != 0) {
     if (strlen(code[addr]) > 1) {
       sprintf(str, "%s", code[addr]);
-      printf("%s\n", code[addr]);
       display_text(renderer, font, str, 400, 250 - 50 * (7 - prevInstructions));
       prevInstructions--;
     }
@@ -66,7 +65,6 @@ void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
 
   while (nextInstructions != 0) {
     if (strcmp(code[addr], "")) {
-      printf("%x %s\n", addr, code[addr]);
       sprintf(str, "%s", code[addr]);
 
       // todo: improve this
