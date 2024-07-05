@@ -16,7 +16,7 @@ typedef struct {
   uint16_t PC; // Program counter
   Bus *bus;
   unsigned long cycles;
-  char current_addressing_mode[3];
+  uint16_t (*addrmode)();
 } CPU6502;
 
 typedef struct {

@@ -71,14 +71,13 @@ uint8_t AND(CPU6502 *cpu, uint16_t addr) {
 uint8_t ASL(CPU6502 *cpu, uint16_t addr) {
   uint8_t value = read_from_memory(cpu->bus, addr);
 
-  uint16_t temp = (strcmp(cpu->current_addressing_mode, "IMP") ? cpu->A : value)
-                  << 1;
+  uint16_t temp = (cpu->addrmode == &IMP ? cpu->A : value) << 1;
 
   set_flag(cpu, C, (temp & 0xFF00) > 0);
   set_flag(cpu, Z, (temp & 0x00FF) == 0x80);
   set_flag(cpu, N, temp & 0x80);
 
-  if (strcmp(cpu->current_addressing_mode, "IMP")) {
+  if (cpu->addrmode == &IMP) {
     cpu->A = temp;
   } else {
     write_to_memory(cpu->bus, addr, temp);
@@ -142,10 +141,14 @@ uint8_t BMI(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t BNE(CPU6502 *cpu, uint16_t addr) {
-  if (get_flag(cpu, Z) == 0) {
+  if (get_flag(cpu, Z) == 1) {
     cpu->cycles++;
+    uint16_t addr_abs = cpu->PC + addr;
 
-    cpu->PC = addr;
+    if ((addr_abs & 0xFF00) != (cpu->PC & 0xFF00)) {
+      cpu->cycles++;
+    }
+    cpu->PC = addr_abs;
   }
 
   return 0;
@@ -304,7 +307,19 @@ uint8_t JMP(CPU6502 *cpu, uint16_t addr) {
   return 0;
 }
 
-uint8_t JSR(CPU6502 *cpu, uint16_t addr) { return 0; }
+uint8_t JSR(CPU6502 *cpu, uint16_t addr) {
+  cpu->PC--;
+
+  cpu->PC = addr;
+
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, (cpu->PC >> 8) & 0x00ff);
+  cpu->SP--;
+  write_to_memory(cpu->bus, 0x0100 + cpu->SP, (cpu->PC >> 8) & 0x00ff);
+  cpu->SP--;
+
+  cpu->PC = addr;
+  return 0;
+}
 
 uint8_t LDA(CPU6502 *cpu, uint16_t addr) {
   cpu->A = 0xf;
@@ -374,13 +389,12 @@ uint8_t ROL(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, addr);
   uint16_t temp = (cpu->bus->current_value << 1) | get_flag(cpu, C);
   set_flag(cpu, C, temp & 0xFF00);
-
-  set_flag(cpu, Z, cpu->bus->current_value == 0);
-  set_flag(cpu, N, cpu->bus->current_value & 0x80);
-  if (strcmp(cpu->current_addressing_mode, "IMP")) {
+  set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
+  set_flag(cpu, N, temp & 0x0080);
+  if (cpu->addrmode == &IMP) {
     cpu->A = temp & 0x00ff;
   } else {
-    write_to_memory(cpu->bus, addr, temp);
+    write_to_memory(cpu->bus, addr, temp & 0x00ff);
   }
   return 0;
 }
@@ -449,20 +463,17 @@ uint8_t SEI(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t STA(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, cpu->PC);
-  cpu->bus->current_value = cpu->A;
+  write_to_memory(cpu->bus, addr, cpu->A);
   return 0;
 }
 
 uint8_t STX(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, cpu->PC);
-  cpu->bus->current_value = cpu->X;
+  write_to_memory(cpu->bus, addr, cpu->A);
   return 0;
 }
 
 uint8_t STY(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, cpu->PC);
-  cpu->bus->current_value = cpu->Y;
+  write_to_memory(cpu->bus, addr, cpu->Y);
   return 0;
 }
 
@@ -518,7 +529,7 @@ void clock(CPU6502 *cpu, Bus *bus) {
     Instructions instruction = LOOKUP[opcode];
 
     cpu->cycles = instruction.cycles;
-    strcpy(cpu->current_addressing_mode, instruction.name);
+    cpu->addrmode = instruction.addrmode;
 
     uint16_t get_address = instruction.addrmode(cpu);
     uint8_t opmode_additional_cycles = instruction.opcode(cpu, get_address);
