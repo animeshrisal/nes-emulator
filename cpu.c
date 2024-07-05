@@ -9,7 +9,7 @@ void create_cpu(CPU6502 *cpu, Bus *bus) {
   cpu->A = 0;
   cpu->X = 0;
   cpu->Y = 0;
-  cpu->PC = 0x0000;
+  cpu->PC = 0xFFFC;
   cpu->SP = 0xfd;
 
   cpu->cycles = 7;
@@ -18,11 +18,11 @@ void create_cpu(CPU6502 *cpu, Bus *bus) {
 
 void reset_cpu(CPU6502 *cpu) {
 
-  uint16_t addr_abs = 0x0000;
+  uint16_t addr_abs = 0xFFFC;
   uint16_t lo = read_from_memory(cpu->bus, addr_abs + 0);
   uint16_t hi = read_from_memory(cpu->bus, addr_abs + 1);
-
   cpu->PC = (hi << 8) | lo;
+  cpu->SP = 0xFd;
 }
 
 uint8_t get_opcode(Bus *bus, uint16_t addr) {
@@ -275,6 +275,7 @@ uint8_t EOR(CPU6502 *cpu, uint16_t addr) {
 uint8_t INC(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, addr);
   uint16_t temp = cpu->bus->current_value + 1;
+  write_to_memory(cpu->bus, addr, temp);
   set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
   set_flag(cpu, N, temp & 0x0080);
   return 0;
@@ -372,9 +373,14 @@ uint8_t ROL(CPU6502 *cpu, uint16_t addr) {
   hold_current_value(cpu->bus, addr);
   uint16_t temp = (cpu->bus->current_value << 1) | get_flag(cpu, C);
   set_flag(cpu, C, temp & 0xFF00);
-  cpu->bus->current_value = temp & 0x00FF;
+
   set_flag(cpu, Z, cpu->bus->current_value == 0);
   set_flag(cpu, N, cpu->bus->current_value & 0x80);
+  if (strcmp(cpu->current_addressing_mode, "IMP")) {
+    cpu->A = temp & 0x00ff;
+  } else {
+    write_to_memory(cpu->bus, addr, temp);
+  }
   return 0;
 }
 
@@ -791,7 +797,5 @@ void prepare_code(char (*code)[100], CPU6502 *cpu) {
 
       addr++;
     }
-
-    // printf("%s \n", code[current_address]);
   }
 }

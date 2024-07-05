@@ -64,19 +64,17 @@ void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
   addr = cpu->PC;
   addr++;
 
-  /*
   while (nextInstructions != 0) {
     if (strcmp(code[addr], "")) {
       printf("%x %s\n", addr, code[addr]);
       sprintf(str, "%s", code[addr]);
 
       // todo: improve this
-      display_text(renderer, font, str, 400, 350 + 50 * (7 - nextInstructions));
+      display_text(renderer, font, str, 400, 300 + 50 * (7 - nextInstructions));
       nextInstructions--;
     }
     addr++;
   }
-*/
 }
 
 void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {
