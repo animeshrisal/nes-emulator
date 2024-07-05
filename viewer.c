@@ -46,32 +46,37 @@ void display_flag(SDL_Renderer *renderer, TTF_Font *font, const char *name,
 
 void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
                           char (*code)[100]) {
-  int prevInstructions = 10;
-  int nextInstructions = 10;
+  int prevInstructions = 7;
+  int nextInstructions = 7;
   char str[100];
   uint16_t addr = cpu->PC;
 
   while (prevInstructions != 0) {
-    if (strcmp(code[addr--], "")) {
+    if (strlen(code[addr]) > 1) {
       sprintf(str, "%s", code[addr]);
-
-      // todo: improve this
-      display_text(renderer, font, str, 400, 200 - 50 * (5 - prevInstructions));
+      printf("%s\n", code[addr]);
+      display_text(renderer, font, str, 400, 250 - 50 * (7 - prevInstructions));
       prevInstructions--;
     }
+    addr--;
   }
 
   addr = cpu->PC;
+  addr++;
 
+  /*
   while (nextInstructions != 0) {
-    if (strcmp(code[addr++], "")) {
+    if (strcmp(code[addr], "")) {
+      printf("%x %s\n", addr, code[addr]);
       sprintf(str, "%s", code[addr]);
 
       // todo: improve this
-      display_text(renderer, font, str, 400, 200 + 50 * (5 - nextInstructions));
+      display_text(renderer, font, str, 400, 350 + 50 * (7 - nextInstructions));
       nextInstructions--;
     }
+    addr++;
   }
+*/
 }
 
 void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {

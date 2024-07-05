@@ -792,6 +792,6 @@ void prepare_code(char (*code)[100], CPU6502 *cpu) {
       addr++;
     }
 
-    printf("%s \n", code[current_address]);
+    // printf("%s \n", code[current_address]);
   }
 }

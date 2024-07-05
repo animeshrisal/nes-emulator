@@ -57,6 +57,10 @@ int main(int argc, char *argv[]) {
   initDisplay(renderer, &font);
   int quit = 0;
   SDL_Event event;
+  display_cpu_info(renderer, &cpu, font);
+  display_instructions(renderer, &cpu, font, code);
+  SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
+  SDL_RenderPresent(renderer);
 
   while (!quit) {
     while (SDL_PollEvent(&event)) {
