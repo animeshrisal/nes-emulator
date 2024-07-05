@@ -716,75 +716,78 @@ void prepare_code(char (*code)[100], CPU6502 *cpu) {
     Instructions instr = LOOKUP[opcode];
     addr++;
     if (instr.addrmode == &IMP) {
-      sprintf(code[current_address], "%04X: %s", addr, instr.name);
+      sprintf(code[current_address], "%04X: %s", current_address, instr.name);
     } else if (instr.addrmode == &IMM) {
       value = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s #$%04x", addr, instr.name,
-              value);
+      sprintf(code[current_address], "%04X: %s #$%04x", current_address,
+              instr.name, value);
       addr++;
     } else if (instr.addrmode == &ZP0) {
       lo = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%02X", addr, instr.name, lo);
+      sprintf(code[current_address], "%04X: %s $%02X", current_address,
+              instr.name, lo);
 
       addr++;
     } else if (instr.addrmode == &ZPX) {
       lo = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%02X, X", addr, instr.name, lo);
+      sprintf(code[current_address], "%04X: %s $%02X, X", current_address,
+              instr.name, lo);
 
       addr++;
     } else if (instr.addrmode == &ZPY) {
       lo = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%02X, Y", addr, instr.name, lo);
+      sprintf(code[current_address], "%04X: %s $%02X, Y", current_address,
+              instr.name, lo);
       addr++;
 
     } else if (instr.addrmode == &REL) {
       value = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%02X [$%04X]", addr, instr.name,
-              value, addr + value);
+      sprintf(code[current_address], "%04X: %s $%02X [$%04X]", current_address,
+              instr.name, value, addr + value);
       addr++;
 
     } else if (instr.addrmode == &ABS) {
       lo = read_from_memory(cpu->bus, addr);
       addr++;
       hi = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%04X", addr, instr.name,
-              (hi << 8) | lo);
+      sprintf(code[current_address], "%04X: %s $%04X", current_address,
+              instr.name, (hi << 8) | lo);
       addr++;
 
     } else if (instr.addrmode == &ABX) {
       lo = read_from_memory(cpu->bus, addr);
       addr++;
       hi = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%04X, X", addr, instr.name,
-              (hi << 8) | lo);
+      sprintf(code[current_address], "%04X: %s $%04X, X", current_address,
+              instr.name, (hi << 8) | lo);
       addr++;
 
     } else if (instr.addrmode == &ABY) {
       lo = read_from_memory(cpu->bus, addr);
       addr++;
       hi = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s $%04X, Y", addr, instr.name,
-              (hi << 8) | lo);
+      sprintf(code[current_address], "%04X: %s $%04X, Y", current_address,
+              instr.name, (hi << 8) | lo);
       addr++;
 
     } else if (instr.addrmode == &IND) {
       lo = read_from_memory(cpu->bus, addr);
       addr++;
       hi = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s ($%04X)", addr, instr.name,
-              (hi << 8) | lo);
+      sprintf(code[current_address], "%04X: %s ($%04X)", current_address,
+              instr.name, (hi << 8) | lo);
 
       addr++;
     } else if (instr.addrmode == &IZX) {
       lo = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s ($%02X, X)", addr, instr.name,
-              lo);
+      sprintf(code[current_address], "%04X: %s ($%02X, X)", current_address,
+              instr.name, lo);
 
       addr++;
     } else if (instr.addrmode == &IZY) {
       lo = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s ($%02X), Y", addr, instr.name,
-              lo);
+      sprintf(code[current_address], "%04X: %s ($%02X), Y", current_address,
+              instr.name, lo);
 
       addr++;
     }
