@@ -89,17 +89,17 @@ void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {
   display_register(renderer, font, "SP", cpu->SP, 10, y);
   y += 40;
 
-  display_flag(renderer, font, "C", cpu->SR & C, 10, y);
+  display_flag(renderer, font, "C", (cpu->SR & C) > 0 ? 1 : 0, 10, y);
   y += 40;
-  display_flag(renderer, font, "Z", cpu->SR & Z, 10, y);
+  display_flag(renderer, font, "Z", (cpu->SR & Z) > 0 ? 1 : 0, 10, y);
   y += 40;
-  display_flag(renderer, font, "I", cpu->SR & I, 10, y);
+  display_flag(renderer, font, "I", (cpu->SR & I) > 0 ? 1 : 0, 10, y);
   y += 40;
-  display_flag(renderer, font, "D", cpu->SR & D, 10, y);
+  display_flag(renderer, font, "D", (cpu->SR & D) > 0 ? 1 : 0, 10, y);
   y += 40;
-  display_flag(renderer, font, "U", cpu->SR & U, 10, y);
+  display_flag(renderer, font, "U", (cpu->SR & U) > 0 ? 1 : 0, 10, y);
   y += 40;
-  display_flag(renderer, font, "V", cpu->SR & V, 10, y);
+  display_flag(renderer, font, "V", (cpu->SR & V) > 0 ? 1 : 0, 10, y);
   y += 40;
-  display_flag(renderer, font, "N", cpu->SR & N, 10, y);
+  display_flag(renderer, font, "N", (cpu->SR & N) > 0 ? 1 : 0, 10, y);
 }
