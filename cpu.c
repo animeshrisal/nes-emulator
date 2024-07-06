@@ -25,6 +25,14 @@ void reset_cpu(CPU6502 *cpu) {
   cpu->SP = 0xFd;
 }
 
+void hold_current_value(CPU6502 *cpu, uint16_t addr) {
+  if (cpu->addrmode == &IMP) {
+    cpu->bus->current_value = addr;
+  } else {
+    cpu->bus->current_value = read_from_memory(cpu->bus, addr);
+  }
+};
+
 uint8_t get_opcode(Bus *bus, uint16_t addr) {
   return read_from_memory(bus, addr);
 }
@@ -229,7 +237,7 @@ uint8_t CLV(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t CMP(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp = (uint16_t)cpu->A - (uint16_t)cpu->bus->current_value;
   set_flag(cpu, C, cpu->A >= cpu->bus->current_value);
   set_flag(cpu, Z, (temp & 0x00ff) == 0x00000);
@@ -238,7 +246,7 @@ uint8_t CMP(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t CPX(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp = (uint16_t)cpu->X - (uint16_t)cpu->bus->current_value;
   set_flag(cpu, C, cpu->X >= cpu->bus->current_value);
   set_flag(cpu, Z, (temp & 0x00ff) == 0x0000);
@@ -247,7 +255,7 @@ uint8_t CPX(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t CPY(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp = (uint16_t)cpu->Y - (uint16_t)cpu->bus->current_value;
   set_flag(cpu, C, cpu->Y >= cpu->bus->current_value);
   set_flag(cpu, Z, (temp & 0x00ff) == 0x0000);
@@ -256,7 +264,7 @@ uint8_t CPY(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t DEC(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp = cpu->bus->current_value - 1;
   write_to_memory(cpu->bus, addr, temp & 0x00ff);
   set_flag(cpu, Z, (temp & 0x00ff) == 0);
@@ -279,7 +287,7 @@ uint8_t DEY(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t EOR(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, cpu->PC);
+  hold_current_value(cpu, cpu->PC);
   cpu->A ^= cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0);
   set_flag(cpu, N, cpu->A & 0x80);
@@ -287,7 +295,7 @@ uint8_t EOR(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t INC(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp = cpu->bus->current_value + 1;
   write_to_memory(cpu->bus, addr, temp & 0x00FF);
   set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
@@ -330,7 +338,7 @@ uint8_t JSR(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t LDA(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   cpu->A = cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0x00);
   set_flag(cpu, N, cpu->A & 0x80);
@@ -338,8 +346,8 @@ uint8_t LDA(CPU6502 *cpu, uint16_t addr) {
 };
 
 uint8_t LDX(CPU6502 *cpu, uint16_t addr) {
+  hold_current_value(cpu, addr);
 
-  hold_current_value(cpu->bus, addr);
   cpu->X = cpu->bus->current_value;
   set_flag(cpu, Z, cpu->X == 0x00);
   set_flag(cpu, N, cpu->X & 0x80);
@@ -347,7 +355,7 @@ uint8_t LDX(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t LDY(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   cpu->Y = cpu->bus->current_value;
   set_flag(cpu, Z, cpu->Y == 0x00);
   set_flag(cpu, N, cpu->Y & 0x80);
@@ -355,7 +363,7 @@ uint8_t LDY(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t LSR(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint8_t value = cpu->bus->current_value;
   set_flag(cpu, C, value & 0x0001);
   uint8_t temp = value >> 1;
@@ -367,7 +375,7 @@ uint8_t LSR(CPU6502 *cpu, uint16_t addr) {
 uint8_t NOP(CPU6502 *cpu, uint16_t addr) { return 0; }
 
 uint8_t ORA(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   cpu->A |= cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0);
   set_flag(cpu, N, cpu->A & 0x80);
@@ -404,7 +412,7 @@ uint8_t PLP(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t ROL(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp = (cpu->bus->current_value << 1) | get_flag(cpu, C);
   set_flag(cpu, C, temp & 0xFF00);
   set_flag(cpu, Z, (temp & 0x00FF) == 0x0000);
@@ -418,7 +426,7 @@ uint8_t ROL(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t ROR(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t temp =
       (uint16_t)(get_flag(cpu, C) << 7) | (cpu->bus->current_value >> 1);
   set_flag(cpu, C, temp & 0xFF00);
@@ -459,7 +467,7 @@ uint8_t RTS(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t SBC(CPU6502 *cpu, uint16_t addr) {
-  hold_current_value(cpu->bus, addr);
+  hold_current_value(cpu, addr);
   uint16_t value = cpu->bus->current_value ^ 0x00FF;
   uint16_t temp = (uint16_t)cpu->A + value + (uint16_t)get_flag(cpu, C);
   set_flag(cpu, C, temp & 0xFF00);
@@ -623,8 +631,9 @@ uint16_t IMP(CPU6502 *cpu) { return 0; }
 
 // uses the next byte in the program counter as a value;
 uint16_t IMM(CPU6502 *cpu) {
+  uint16_t addr = cpu->PC;
   cpu->PC++;
-  return cpu->PC;
+  return addr;
 } // Immediate
 //
 uint16_t ZP0(CPU6502 *cpu) {
@@ -705,6 +714,7 @@ uint16_t IND(CPU6502 *cpu) {
   cpu->PC++;
 
   uint16_t addr_abs = (hi << 8) | lo;
+
   return addr_abs;
 } // Indirect
 
@@ -726,9 +736,9 @@ uint16_t IZY(CPU6502 *cpu) {
   uint16_t addr = read_from_memory(cpu->bus, cpu->PC);
   cpu->PC++;
 
-  uint16_t lo = read_from_memory(cpu->bus, (addr + (uint16_t)cpu->X) & 0x00FF);
+  uint16_t lo = read_from_memory(cpu->bus, (addr + (uint16_t)cpu->Y) & 0x00FF);
   uint16_t hi =
-      read_from_memory(cpu->bus, (addr + (uint16_t)cpu->X + 1) & 0x00FF);
+      read_from_memory(cpu->bus, (addr + (uint16_t)cpu->Y + 1) & 0x00FF);
 
   uint16_t addr_abs = (hi << 8) | lo;
 
@@ -756,10 +766,10 @@ void prepare_code(char (*code)[100], CPU6502 *cpu) {
     Instructions instr = LOOKUP[opcode];
     addr++;
     if (instr.addrmode == &IMP) {
-      sprintf(code[current_address], "%04X: %s", current_address, instr.name);
+      sprintf(code[current_address], "%04X: %s ", current_address, instr.name);
     } else if (instr.addrmode == &IMM) {
       value = read_from_memory(cpu->bus, addr);
-      sprintf(code[current_address], "%04X: %s #$%04x", current_address,
+      sprintf(code[current_address], "%04X: %s #$%02x ", current_address,
               instr.name, value);
       addr++;
     } else if (instr.addrmode == &ZP0) {

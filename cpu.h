@@ -39,6 +39,7 @@ typedef enum {
 
 void create_cpu(CPU6502 *cpu, Bus *bus);
 void reset_cpu(CPU6502 *cpu);
+void hold_current_value(CPU6502 *cpu, uint16_t addr);
 
 uint8_t ADC(CPU6502 *cpu, uint16_t addr);
 uint8_t AND(CPU6502 *cpu, uint16_t addr);

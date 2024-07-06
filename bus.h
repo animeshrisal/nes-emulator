@@ -16,8 +16,6 @@ void write_to_memory(Bus *bus, uint16_t addr, uint8_t data);
 
 uint8_t read_from_memory(Bus *bus, uint16_t addr);
 
-void hold_current_value(Bus *bus, uint16_t addr);
-
 void load_cartridge(Bus *bus, Cartridge *cartridge);
 
 uint16_t read_from_cartridge(Bus *bus, uint16_t addr);

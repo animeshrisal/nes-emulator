@@ -4,9 +4,7 @@
 #include <stdlib.h>
 
 void write_to_memory(Bus *bus, uint16_t addr, uint8_t data) {
-  if (addr >= 0x0000 && addr <= 0x0800) {
-    bus->memory[addr] = data;
-  };
+  bus->memory[addr] = data;
 }
 
 uint8_t read_from_memory(Bus *bus, uint16_t addr) {
@@ -20,10 +18,6 @@ uint8_t read_from_memory(Bus *bus, uint16_t addr) {
 
   return bus->memory[addr];
 }
-
-void hold_current_value(Bus *bus, uint16_t addr) {
-  bus->current_value = read_from_memory(bus, addr);
-};
 
 void load_cartridge(Bus *bus, Cartridge *cartridge) {
   FILE *file = fopen("basics.nes", "rb");
