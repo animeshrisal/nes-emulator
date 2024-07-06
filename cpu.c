@@ -330,7 +330,8 @@ uint8_t JSR(CPU6502 *cpu, uint16_t addr) {
 }
 
 uint8_t LDA(CPU6502 *cpu, uint16_t addr) {
-  cpu->A = addr;
+  hold_current_value(cpu->bus, addr);
+  cpu->A = cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0x00);
   set_flag(cpu, N, cpu->A & 0x80);
   return 0;
@@ -370,7 +371,7 @@ uint8_t ORA(CPU6502 *cpu, uint16_t addr) {
   cpu->A |= cpu->bus->current_value;
   set_flag(cpu, Z, cpu->A == 0);
   set_flag(cpu, N, cpu->A & 0x80);
-  return 0;
+  return 1;
 }
 
 uint8_t PHA(CPU6502 *cpu, uint16_t addr) {
