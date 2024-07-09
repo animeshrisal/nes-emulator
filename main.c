@@ -62,6 +62,7 @@ int main(int argc, char *argv[]) {
   SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
   SDL_RenderPresent(renderer);
 
+  /*
   while (!quit) {
     while (SDL_PollEvent(&event)) {
       switch (event.type) {
@@ -93,22 +94,21 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  */
 
-  /*
-    while (test-- > 0) {
-      onUpdate(&cpu);
-      display_cpu_info(renderer, &cpu, font);
-      display_instructions(renderer, &cpu, font, code);
-      SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
-      SDL_RenderPresent(renderer);
+  while (1) {
+    onUpdate(&cpu);
+    display_cpu_info(renderer, &cpu, font);
+    display_instructions(renderer, &cpu, font, code);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
+    SDL_RenderPresent(renderer);
 
-      SDL_RenderClear(renderer);
-    };
+    SDL_RenderClear(renderer);
+  };
 
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    */
+  SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  SDL_Quit();
 
   return 0;
 }

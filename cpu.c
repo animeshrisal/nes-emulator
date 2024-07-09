@@ -135,7 +135,13 @@ uint8_t BEQ(CPU6502 *cpu, uint16_t addr) {
   return 0;
 }
 
-uint8_t BIT(CPU6502 *cpu, uint16_t addr) {}
+uint8_t BIT(CPU6502 *cpu, uint16_t addr) {
+  uint8_t temp = cpu->A & read_from_memory(cpu->bus, addr);
+  set_flag(cpu, Z, (temp & 0x00FF) == 0x00);
+  set_flag(cpu, N, cpu->bus->current_value & (1 << 7));
+  set_flag(cpu, V, cpu->bus->current_value & (1 << 7));
+  return 0;
+}
 
 uint8_t BMI(CPU6502 *cpu, uint16_t addr) {
 
