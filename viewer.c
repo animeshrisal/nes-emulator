@@ -78,6 +78,8 @@ void display_instructions(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font,
 void display_cpu_info(SDL_Renderer *renderer, CPU6502 *cpu, TTF_Font *font) {
   int y = 10;
 
+  display_text(renderer, font, ">", 350, 250);
+
   display_register(renderer, font, "PC", cpu->PC, 10, y);
   y += 40;
   display_register(renderer, font, "A", cpu->A, 10, y);
