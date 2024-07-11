@@ -2,7 +2,6 @@
 #include "bus.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 #include <sys/types.h>
 
 void create_cpu(CPU6502 *cpu, Bus *bus) {
@@ -138,8 +137,8 @@ uint8_t BEQ(CPU6502 *cpu, uint16_t addr) {
 uint8_t BIT(CPU6502 *cpu, uint16_t addr) {
   uint8_t temp = cpu->A & read_from_memory(cpu->bus, addr);
   set_flag(cpu, Z, (temp & 0x00FF) == 0x00);
-  set_flag(cpu, N, cpu->bus->current_value & (1 << 7));
-  set_flag(cpu, V, cpu->bus->current_value & (1 << 7));
+  set_flag(cpu, N, cpu->bus->current_value);
+  set_flag(cpu, V, cpu->bus->current_value);
   return 0;
 }
 
